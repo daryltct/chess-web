@@ -14,6 +14,14 @@ const App = () => {
     setSocket(io(PORT))
   }, [])
 
+  useEffect(() => {
+    if(socket){
+        socket.on('gameStart', (data) => {
+            console.log(data)
+        })
+    }
+  })
+
 
   return (
     <div>
