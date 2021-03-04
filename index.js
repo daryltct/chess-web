@@ -10,6 +10,10 @@ io.on('connection', (socket) => {
         console.log('user joined room' + data)
     })
 
+    socket.on('move', (data) => {
+        socket.broadcast.emit('move', {from: data.from, to: data.to, promotion: 'q'})
+    })
+
     socket.on('disconnect', () => {
         console.log('user disconnected')
     })

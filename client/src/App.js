@@ -1,23 +1,25 @@
 import './App.css';
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import io from 'socket.io-client'
-//const io = require('socket.io-client')
 
-let socket
+// import WithMoveValidation from './components/Chess'
+import Game from './components/Game'
+
 const PORT = '/'
 
 const App = () => {
+  const [socket, setSocket] = useState(null)
 
   useEffect(() => {
-    socket = io(PORT)
+    setSocket(io(PORT))
+  }, [])
 
-  }, [PORT])
 
-  const connect = () => {
-    socket.emit('join', 'pressed')
-  }
-
-  return <div className='App'>Chess App <button onClick={connect}>click</button></div>
+  return (
+    <div>
+      <Game socket={socket}/>
+    </div>
+  )
 }
 
 export default App;
