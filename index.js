@@ -14,13 +14,13 @@ const startGame = () => {
     const whitePlayer = coinFlip ? player1 : player2
     const blackPlayer = coinFlip ? player2 : player1
 
-    whitePlayer.color = 'w'
-    blackPlayer.color = 'b'
+    whitePlayer.color = 'white'
+    blackPlayer.color = 'black'
 
     const roomId = uniqid() // generate random room id
 
-    whitePlayer.emit('gameStart', {color: 'w'})
-    blackPlayer.emit('gameStart', {color: 'b'})
+    whitePlayer.emit('gameStart', {color: 'white', roomId: roomId})
+    blackPlayer.emit('gameStart', {color: 'black', roomId: roomId})
 }
 
 io.on('connection', (socket) => {

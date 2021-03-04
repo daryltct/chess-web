@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import  Chess  from "chess.js";
 import Chessboard from "chessboardjsx";
 
-const Game = ({socket}) => {
+const Game = ({socket, roomData}) => {
     const [game, setGame] = useState(null)
     const [gameState, setGameState] = useState({
         fen: "start",
-        history: []
+        history: [],
+        turn: 'w'
     })
 
     useEffect(() => {
@@ -14,17 +15,22 @@ const Game = ({socket}) => {
     }, [])
 
     useEffect(() => {
-        if(socket){
+        if(socket && game){
             socket.on('move', (move) => {
                 game.move(move)
                 setGameState((prevState) => ({
                     ...prevState,
                     fen: game.fen(),
-                    history: game.history({verbose: true})
+                    history: game.history({verbose: true}),
+                    turn: game.turn()
                 }))
             })
         }
     })
+
+    const isPlayerTurn = () => {
+        return game.turn() == roomData.color.chartAt(0)
+    }
 
     const onDrop = ({ sourceSquare, targetSquare }) => {
         // check if the move is legal
@@ -40,14 +46,20 @@ const Game = ({socket}) => {
         setGameState((prevState) => ({
             ...prevState,
             fen: game.fen(),
-            history: game.history({ verbose: true })
+            history: game.history({ verbose: true }),
+            turn: game.turn()
           }));
         socket.emit('move', move)
       };
 
     return (
         <div>
-            <Chessboard position={gameState.fen} onDrop={onDrop}/>
+            <Chessboard 
+                position={gameState.fen} 
+                onDrop={onDrop} 
+                orientation={roomData.color} 
+                draggable={gameState.turn == roomData.color.charAt(0)}
+            />
         </div>
     )
 }

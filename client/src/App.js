@@ -9,6 +9,7 @@ const PORT = '/'
 
 const App = () => {
   const [socket, setSocket] = useState(null)
+  const [roomData, setRoomData] = useState(null);
 
   useEffect(() => {
     setSocket(io(PORT))
@@ -17,6 +18,7 @@ const App = () => {
   useEffect(() => {
     if(socket){
         socket.on('gameStart', (data) => {
+          setRoomData(data)
             console.log(data)
         })
     }
@@ -25,7 +27,7 @@ const App = () => {
 
   return (
     <div>
-      <Game socket={socket}/>
+      {roomData ? <Game socket={socket} roomData={roomData} /> : <button>Find Game</button>}
     </div>
   )
 }
