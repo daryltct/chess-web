@@ -18,6 +18,8 @@ const startGame = () => {
     blackPlayer.color = 'black'
 
     const roomId = uniqid() // generate random room id
+    whitePlayer.join(roomId)
+    blackPlayer.join(roomId)
 
     whitePlayer.emit('gameStart', {color: 'white', roomId: roomId})
     blackPlayer.emit('gameStart', {color: 'black', roomId: roomId})
@@ -36,7 +38,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('move', (data) => {
-        socket.broadcast.emit(data.roomId, {from: data.move.from, to: data.move.to, promotion: 'q'})
+        socket.to(data.roomId).emit('move', {from: data.move.from, to: data.move.to, promotion: 'q'})
     })
 
     socket.on('disconnect', () => {

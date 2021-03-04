@@ -16,7 +16,8 @@ const Game = ({socket, roomData}) => {
 
     useEffect(() => {
         if(socket && game){
-            socket.on(roomData.roomId, (move) => {
+            socket.on('move', (move) => {
+                console.log(move)
                 game.move(move)
                 setGameState((prevState) => ({
                     ...prevState,
