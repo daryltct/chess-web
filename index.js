@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('move', (data) => {
-        socket.broadcast.emit('move', {from: data.from, to: data.to, promotion: 'q'})
+        socket.broadcast.emit(data.roomId, {from: data.move.from, to: data.move.to, promotion: 'q'})
     })
 
     socket.on('disconnect', () => {

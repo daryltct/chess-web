@@ -16,7 +16,7 @@ const Game = ({socket, roomData}) => {
 
     useEffect(() => {
         if(socket && game){
-            socket.on('move', (move) => {
+            socket.on(roomData.roomId, (move) => {
                 game.move(move)
                 setGameState((prevState) => ({
                     ...prevState,
@@ -49,7 +49,7 @@ const Game = ({socket, roomData}) => {
             history: game.history({ verbose: true }),
             turn: game.turn()
           }));
-        socket.emit('move', move)
+        socket.emit('move', {roomId: roomData.roomId, move: move})
       };
 
     return (
