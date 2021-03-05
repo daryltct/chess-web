@@ -1,13 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './App'
 
-import {GameContextProvider} from './context/GameContext'
+import { GameContextProvider } from './context/GameContext'
+import { UserContextProvider } from './context/UserContext'
 
 ReactDOM.render(
-  <GameContextProvider>
-    <App />
-  </GameContextProvider>,
-  document.getElementById('root')
-);
-
+	<UserContextProvider>
+		<GameContextProvider>
+			<App />
+		</GameContextProvider>
+	</UserContextProvider>,
+	document.getElementById('root')
+)
