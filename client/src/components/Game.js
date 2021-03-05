@@ -7,7 +7,8 @@ const Game = ({socket, roomData}) => {
     const [gameState, setGameState] = useState({
         fen: "start",
         history: [],
-        turn: 'w'
+        turn: 'w',
+        winner: null
     })
 
     useEffect(() => {
@@ -15,23 +16,37 @@ const Game = ({socket, roomData}) => {
     }, [])
 
     useEffect(() => {
-        if(socket && game){
-            socket.on('move', (move) => {
-                console.log(move)
-                game.move(move)
-                setGameState((prevState) => ({
-                    ...prevState,
-                    fen: game.fen(),
-                    history: game.history({verbose: true}),
-                    turn: game.turn()
-                }))
-            })
+        const moveHandler = (move) => {
+            game.move(move)
+            setGameState((prevState) => ({
+                ...prevState,
+                fen: game.fen(),
+                history: game.history({verbose: true}),
+                turn: game.turn()
+            }))
         }
-    })
 
-    const isPlayerTurn = () => {
-        return game.turn() == roomData.color.chartAt(0)
-    }
+        const gameEndHandler = (data) => {
+            game.move(data.move)
+            setGameState((prevState) => ({
+                ...prevState,
+                fen: game.fen(),
+                turn: 'z',
+                winner: data.winner,
+                reason: data.reason
+            }))
+        }
+
+        if (socket && game) {
+            socket.on('move', moveHandler)
+            socket.on('gameEnd', gameEndHandler)
+
+            return () => {
+                socket.off('move', moveHandler)
+                socket.off('gameEnd', gameEndHandler)
+            }
+        }
+    }, [socket, game])
 
     const onDrop = ({ sourceSquare, targetSquare }) => {
         // check if the move is legal
@@ -49,8 +64,26 @@ const Game = ({socket, roomData}) => {
             fen: game.fen(),
             history: game.history({ verbose: true }),
             turn: game.turn()
-          }));
-        socket.emit('move', {roomId: roomData.roomId, move: move})
+        }));
+        // check winning conditions
+        if (game.in_checkmate()) {
+            socket.emit('gameEnd', {roomId: roomData.roomId, move:move, winner: roomData.color, reason: 'checkmate'})
+            setGameState((prevState) => ({
+                ...prevState,
+                winner: roomData.color,
+                reason: 'checkmate'
+            }))
+        } else if (game.in_stalemate()) {
+            socket.emit('gameEnd', {roomId: roomData.roomId, move:move, winner: roomData.color, reason: 'stalemate'})
+            setGameState((prevState) => ({
+                ...prevState,
+                winner: roomData.color,
+                reason: 'stalemate'
+            }))
+        } else {
+            socket.emit('move', {roomId: roomData.roomId, move: move})
+        }
+        
       };
 
     return (
@@ -61,6 +94,7 @@ const Game = ({socket, roomData}) => {
                 orientation={roomData.color} 
                 draggable={gameState.turn == roomData.color.charAt(0)}
             />
+            {gameState.winner && <h1>{`${gameState.winner} won by ${gameState.reason}`}</h1>}
         </div>
     )
 }

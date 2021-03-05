@@ -41,6 +41,10 @@ io.on('connection', (socket) => {
         socket.to(data.roomId).emit('move', {from: data.move.from, to: data.move.to, promotion: 'q'})
     })
 
+    socket.on('gameEnd', (data) => {
+        socket.to(data.roomId).emit('gameEnd', {...data, move: {from: data.move.from, to: data.move.to, promotion: 'q'}})
+    })
+
     socket.on('disconnect', () => {
         playerQueue = playerQueue.filter((s) => socket.id !== s.id)
         console.log(`Socket ${socket.id} has disconnected | Length of queue: ${playerQueue.length}`)
