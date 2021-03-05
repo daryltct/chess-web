@@ -1,35 +1,30 @@
-import './App.css';
-import React, { useState, useEffect } from 'react'
+import './App.css'
+import React, { useState, useEffect, useContext } from 'react'
 import io from 'socket.io-client'
 
-// import WithMoveValidation from './components/Chess'
+import { GameContext } from './context/GameContext'
 import Game from './components/Game'
 
 const PORT = '/'
 
 const App = () => {
-  const [socket, setSocket] = useState(null)
-  const [roomData, setRoomData] = useState(null);
+	const { gameState, updateGameState } = useContext(GameContext)
 
-  useEffect(() => {
-    setSocket(io(PORT))
-  }, [])
+	const [ socket, setSocket ] = useState(null)
 
-  useEffect(() => {
-    if(socket){
-        socket.on('gameStart', (data) => {
-          setRoomData(data)
-            console.log(data)
-        })
-    }
-  })
+	useEffect(() => {
+		setSocket(io(PORT))
+	}, [])
 
+	useEffect(() => {
+		if (socket) {
+			socket.on('gameStart', (data) => {
+				updateGameState(data)
+			})
+		}
+	})
 
-  return (
-    <div>
-      {roomData ? <Game socket={socket} roomData={roomData} /> : <button>Find Game</button>}
-    </div>
-  )
+	return <div>{gameState.roomId ? <Game socket={socket} /> : <button>Find Game</button>}</div>
 }
 
-export default App;
+export default App
