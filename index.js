@@ -20,6 +20,7 @@ const startGame = () => {
 	const roomId = uniqid() // generate random room id
 	whitePlayer.join(roomId)
 	blackPlayer.join(roomId)
+	console.log(roomId)
 
 	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId })
 	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId })
@@ -48,8 +49,14 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('rematch', (data) => {
-		console.log(data)
 		socket.to(data.roomId).emit('rematch', { ...data })
+	})
+
+	socket.on('disconnecting', () => {
+		// socket.to(socket.room)
+		socket.rooms.forEach((room) => {
+			socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
+		})
 	})
 
 	socket.on('disconnect', () => {

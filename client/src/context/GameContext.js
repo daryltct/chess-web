@@ -11,10 +11,6 @@ const initialState = {
 	turn: 'w',
 	winner: null,
 	reason: null
-	// rematch: {
-	//     initiate: false,
-	//     receive: false
-	// }
 }
 
 const GameContextProvider = (props) => {
@@ -37,8 +33,12 @@ const GameContextProvider = (props) => {
 		}))
 	}
 
+	const leaveGameState = () => {
+		setGameState(initialState)
+	}
+
 	return (
-		<GameContext.Provider value={{ gameState, updateGameState, rematchGameState }}>
+		<GameContext.Provider value={{ gameState, updateGameState, rematchGameState, leaveGameState }}>
 			{props.children}
 		</GameContext.Provider>
 	)

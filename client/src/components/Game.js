@@ -10,7 +10,7 @@ const initialState = {
 }
 
 const Game = ({ socket }) => {
-	const { gameState, updateGameState, rematchGameState } = useContext(GameContext)
+	const { gameState, updateGameState, rematchGameState, leaveGameState } = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason } = gameState
 
 	const [ rematch, setRematch ] = useState(initialState)
@@ -57,10 +57,15 @@ const Game = ({ socket }) => {
 				}
 			}
 
+			const opponentDisconnectHandler = (data) => {
+				leaveGameState()
+			}
+
 			if (socket && game) {
 				socket.on('move', moveHandler)
 				socket.on('gameEnd', gameEndHandler)
 				socket.on('rematch', rematchHandler)
+				socket.on('playerDisconnect', opponentDisconnectHandler)
 
 				return () => {
 					socket.off('move', moveHandler)
