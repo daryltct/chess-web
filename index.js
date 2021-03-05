@@ -33,8 +33,13 @@ io.on('connection', (socket) => {
 	// 	startGame()
 	// }
 
-	socket.on('findGame', () => {
-		playerQueue.push(socket)
+	socket.on('findGame', (signal) => {
+		if (signal) {
+			playerQueue.push(socket)
+		} else {
+			playerQueue = playerQueue.filter((s) => socket.id !== s.id)
+		}
+
 		if (playerQueue.length >= 2) {
 			startGame()
 		}

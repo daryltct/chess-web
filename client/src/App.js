@@ -9,7 +9,7 @@ import Game from './components/Game'
 const PORT = '/'
 
 const App = () => {
-	const { userState, updateUserState, joinQueue } = useContext(UserContext)
+	const { userState, updateUserState, joinQueue, leaveQueue } = useContext(UserContext)
 	const { gameState, updateGameState } = useContext(GameContext)
 
 	const { socket, inQueue } = userState
@@ -31,9 +31,14 @@ const App = () => {
 		}
 	})
 
-	const findGame = () => {
-		socket.emit('findGame')
-		joinQueue()
+	const toggleQueue = () => {
+		if (!inQueue) {
+			socket.emit('findGame', true)
+			joinQueue()
+		} else {
+			socket.emit('findGame', false)
+			leaveQueue()
+		}
 	}
 
 	return (
@@ -41,9 +46,7 @@ const App = () => {
 			{gameState.roomId ? (
 				<Game />
 			) : (
-				<button onClick={findGame} disabled={inQueue}>
-					Find Game
-				</button>
+				<button onClick={toggleQueue}>{inQueue ? 'Cancel Search' : 'Find Game'}</button>
 			)}
 		</div>
 	)
