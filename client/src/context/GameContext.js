@@ -11,6 +11,10 @@ const initialState = {
 	turn: 'w',
 	winner: null,
 	reason: null
+	// rematch: {
+	//     initiate: false,
+	//     receive: false
+	// }
 }
 
 const GameContextProvider = (props) => {
@@ -23,7 +27,21 @@ const GameContextProvider = (props) => {
 		}))
 	}
 
-	return <GameContext.Provider value={{ gameState, updateGameState }}>{props.children}</GameContext.Provider>
+	const rematchGameState = (newChessObj) => {
+		setGameState((prevState) => ({
+			...initialState,
+			roomId: prevState.roomId,
+			color: prevState.color === 'white' ? 'black' : 'white',
+			game: newChessObj,
+			fen: 'start'
+		}))
+	}
+
+	return (
+		<GameContext.Provider value={{ gameState, updateGameState, rematchGameState }}>
+			{props.children}
+		</GameContext.Provider>
+	)
 }
 
 export { GameContextProvider, GameContext }

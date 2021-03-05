@@ -7,50 +7,57 @@ const uniqid = require('uniqid')
 let playerQueue = []
 
 const startGame = () => {
-    const player1 = playerQueue.shift()
-    const player2 = playerQueue.shift()
+	const player1 = playerQueue.shift()
+	const player2 = playerQueue.shift()
 
-    const coinFlip = Math.random() > 0.5
-    const whitePlayer = coinFlip ? player1 : player2
-    const blackPlayer = coinFlip ? player2 : player1
+	const coinFlip = Math.random() > 0.5
+	const whitePlayer = coinFlip ? player1 : player2
+	const blackPlayer = coinFlip ? player2 : player1
 
-    whitePlayer.color = 'white'
-    blackPlayer.color = 'black'
+	whitePlayer.color = 'white'
+	blackPlayer.color = 'black'
 
-    const roomId = uniqid() // generate random room id
-    whitePlayer.join(roomId)
-    blackPlayer.join(roomId)
+	const roomId = uniqid() // generate random room id
+	whitePlayer.join(roomId)
+	blackPlayer.join(roomId)
 
-    whitePlayer.emit('gameStart', {color: 'white', roomId: roomId})
-    blackPlayer.emit('gameStart', {color: 'black', roomId: roomId})
+	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId })
+	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId })
 }
 
 io.on('connection', (socket) => {
-    playerQueue.push(socket)
-    console.log(`Socket ${socket.id} has connected | Length of queue: ${playerQueue.length}`)
-    if (playerQueue.length >= 2) {
-        startGame()
-    }
+	playerQueue.push(socket)
+	console.log(`Socket ${socket.id} has connected | Length of queue: ${playerQueue.length}`)
+	if (playerQueue.length >= 2) {
+		startGame()
+	}
 
-    socket.on('join', (data) => {
-        socket.join(data)
-        console.log('user joined room' + data)
-    })
+	socket.on('join', (data) => {
+		socket.join(data)
+		console.log('user joined room' + data)
+	})
 
-    socket.on('move', (data) => {
-        socket.to(data.roomId).emit('move', {from: data.move.from, to: data.move.to, promotion: 'q'})
-    })
+	socket.on('move', (data) => {
+		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
+	})
 
-    socket.on('gameEnd', (data) => {
-        socket.to(data.roomId).emit('gameEnd', {...data, move: {from: data.move.from, to: data.move.to, promotion: 'q'}})
-    })
+	socket.on('gameEnd', (data) => {
+		socket
+			.to(data.roomId)
+			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
+	})
 
-    socket.on('disconnect', () => {
-        playerQueue = playerQueue.filter((s) => socket.id !== s.id)
-        console.log(`Socket ${socket.id} has disconnected | Length of queue: ${playerQueue.length}`)
-    })
+	socket.on('rematch', (data) => {
+		console.log(data)
+		socket.to(data.roomId).emit('rematch', { ...data })
+	})
+
+	socket.on('disconnect', () => {
+		playerQueue = playerQueue.filter((s) => socket.id !== s.id)
+		console.log(`Socket ${socket.id} has disconnected | Length of queue: ${playerQueue.length}`)
+	})
 })
 
 httpServer.listen(5000, () => {
-    console.log('listening on port 5000')
+	console.log('listening on port 5000')
 })
