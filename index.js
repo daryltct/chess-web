@@ -27,15 +27,17 @@ const startGame = () => {
 }
 
 io.on('connection', (socket) => {
-	playerQueue.push(socket)
+	//playerQueue.push(socket)
 	console.log(`Socket ${socket.id} has connected | Length of queue: ${playerQueue.length}`)
-	if (playerQueue.length >= 2) {
-		startGame()
-	}
+	// if (playerQueue.length >= 2) {
+	// 	startGame()
+	// }
 
-	socket.on('join', (data) => {
-		socket.join(data)
-		console.log('user joined room' + data)
+	socket.on('findGame', () => {
+		playerQueue.push(socket)
+		if (playerQueue.length >= 2) {
+			startGame()
+		}
 	})
 
 	socket.on('move', (data) => {

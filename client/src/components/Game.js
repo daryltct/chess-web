@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 
+import { UserContext } from '../context/UserContext'
 import { GameContext } from '../context/GameContext'
 
 const initialState = {
@@ -10,6 +11,7 @@ const initialState = {
 }
 
 const Game = ({ socket }) => {
+	const { leaveQueue } = useContext(UserContext)
 	const { gameState, updateGameState, rematchGameState, leaveGameState } = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason } = gameState
 
@@ -59,6 +61,7 @@ const Game = ({ socket }) => {
 
 			const opponentDisconnectHandler = (data) => {
 				leaveGameState()
+				leaveQueue()
 			}
 
 			if (socket && game) {
