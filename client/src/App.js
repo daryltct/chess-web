@@ -9,15 +9,18 @@ import Game from './components/Game'
 const PORT = '/'
 
 const App = () => {
-	const { userState, joinQueue } = useContext(UserContext)
+	const { userState, updateUserState, joinQueue } = useContext(UserContext)
 	const { gameState, updateGameState } = useContext(GameContext)
 
-	const { inQueue } = userState
+	const { socket, inQueue } = userState
 
-	const [ socket, setSocket ] = useState(null)
+	//const [ socket, setSocket ] = useState(null)
 
 	useEffect(() => {
-		setSocket(io(PORT))
+		updateUserState({
+			socket: io(PORT)
+		})
+		//setSocket(io(PORT))
 	}, [])
 
 	useEffect(() => {
@@ -36,7 +39,7 @@ const App = () => {
 	return (
 		<div>
 			{gameState.roomId ? (
-				<Game socket={socket} />
+				<Game />
 			) : (
 				<button onClick={findGame} disabled={inQueue}>
 					Find Game

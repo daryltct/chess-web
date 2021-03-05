@@ -4,8 +4,16 @@ const UserContext = createContext()
 
 const UserContextProvider = (props) => {
 	const [ userState, setUserState ] = useState({
+		socket: null,
 		inQueue: false
 	})
+
+	const updateUserState = (obj) => {
+		setUserState((prevState) => ({
+			...prevState,
+			...obj
+		}))
+	}
 
 	const joinQueue = () => {
 		setUserState((prevState) => ({
@@ -21,7 +29,11 @@ const UserContextProvider = (props) => {
 		}))
 	}
 
-	return <UserContext.Provider value={{ userState, joinQueue, leaveQueue }}>{props.children}</UserContext.Provider>
+	return (
+		<UserContext.Provider value={{ userState, updateUserState, joinQueue, leaveQueue }}>
+			{props.children}
+		</UserContext.Provider>
+	)
 }
 
 export { UserContext, UserContextProvider }

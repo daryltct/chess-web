@@ -10,8 +10,9 @@ const initialState = {
 	receive: false
 }
 
-const Game = ({ socket }) => {
-	const { leaveQueue } = useContext(UserContext)
+const Game = () => {
+	const { userState, leaveQueue } = useContext(UserContext)
+	const { socket } = userState
 	const { gameState, updateGameState, rematchGameState, leaveGameState } = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason } = gameState
 
