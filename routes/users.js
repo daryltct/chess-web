@@ -44,15 +44,15 @@ router.post(
 			})
 			await user.save()
 
-			const result = {
+			const jwtPayload = {
 				user: {
 					id: user.id,
 					name: user.name
 				}
 			}
-			// create a json web token with result, sign it, and return it to user
+			// create a json web token with payload, sign it, and return it to user
 			jwt.sign(
-				result,
+				jwtPayload,
 				process.env.JWT_SECRET,
 				{
 					expiresIn: 7200 // 2 hours
