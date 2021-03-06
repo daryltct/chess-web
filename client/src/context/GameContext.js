@@ -10,7 +10,9 @@ const initialState = {
 	history: [],
 	turn: 'w',
 	winner: null,
-	reason: null
+	reason: null,
+	rematch: false,
+	opponent: null
 }
 
 const GameContextProvider = (props) => {
@@ -29,7 +31,11 @@ const GameContextProvider = (props) => {
 			roomId: prevState.roomId,
 			color: prevState.color === 'white' ? 'black' : 'white',
 			game: newChessObj,
-			fen: 'start'
+			fen: 'start',
+			opponent: {
+				id: prevState.opponent.id,
+				rematch: false
+			}
 		}))
 	}
 

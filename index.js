@@ -22,8 +22,8 @@ const startGame = () => {
 	blackPlayer.join(roomId)
 	console.log(roomId)
 
-	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId })
-	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId })
+	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId, opponent: { id: blackPlayer.id, rematch: false } })
+	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId, opponent: { id: whitePlayer.id, rematch: false } })
 }
 
 io.on('connection', (socket) => {
@@ -55,8 +55,12 @@ io.on('connection', (socket) => {
 			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
 	})
 
+	// incomingObject = {
+	//     roomId,
+	//     opponent: {}
+	// }
 	socket.on('rematch', (data) => {
-		socket.to(data.roomId).emit('rematch', { ...data })
+		socket.to(data.roomId).emit('rematch', { ...data.opponent })
 	})
 
 	socket.on('disconnecting', () => {

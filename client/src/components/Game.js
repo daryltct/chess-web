@@ -14,9 +14,9 @@ const Game = () => {
 	const { userState, leaveQueue } = useContext(UserContext)
 	const { socket } = userState
 	const { gameState, updateGameState, rematchGameState, leaveGameState } = useContext(GameContext)
-	const { game, roomId, color, fen, turn, winner, reason } = gameState
+	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
 
-	const [ rematch, setRematch ] = useState(initialState)
+	//const [ rematch, setRematch ] = useState(initialState)
 
 	useEffect(() => {
 		updateGameState({
@@ -48,16 +48,9 @@ const Game = () => {
 			}
 
 			const rematchHandler = (data) => {
-				// both players initiated
-				if (rematch.initiate && data.rematch) {
-					rematchGameState(new Chess())
-					setRematch(initialState)
-				} else if (data.rematch) {
-					setRematch((prevState) => ({
-						...prevState,
-						receive: true
-					}))
-				}
+				updateGameState({
+					opponent: { ...data }
+				})
 			}
 
 			const opponentDisconnectHandler = (data) => {
@@ -79,6 +72,18 @@ const Game = () => {
 			}
 		},
 		[ socket, game, rematch, gameState ]
+	)
+
+	// if this player and opponent both 'true' in rematch, then restart board
+	useEffect(
+		() => {
+			if (gameState) {
+				if (opponent.rematch && rematch) {
+					rematchGameState(new Chess())
+				}
+			}
+		},
+		[ gameState, opponent ]
 	)
 
 	const onDrop = ({ sourceSquare, targetSquare }) => {
@@ -116,17 +121,16 @@ const Game = () => {
 	}
 
 	const initiateRematch = () => {
-		setRematch((prevState) => ({
-			...prevState,
-			initiate: true
-		}))
-		socket.emit('rematch', { roomId, rematch: true })
-	}
-
-	const acceptRematch = () => {
-		rematchGameState(new Chess())
-		setRematch(initialState)
-		socket.emit('rematch', { roomId, rematch: true })
+		updateGameState({
+			rematch: true
+		})
+		socket.emit('rematch', {
+			roomId,
+			opponent: {
+				id: socket.id,
+				rematch: true
+			}
+		})
 	}
 
 	return (
@@ -135,16 +139,15 @@ const Game = () => {
 			{winner && (
 				<div>
 					<h1>{`${winner} won by ${reason}`}</h1>
-					<button onClick={initiateRematch} disabled={rematch.initiate || rematch.receive}>
+					<button onClick={initiateRematch} disabled={rematch || opponent.rematch}>
 						Rematch
 					</button>
-					<button onClick={() => console.log(rematch.initiate)}>print</button>
 				</div>
 			)}
-			{rematch.receive &&
-			!rematch.initiate && (
+			{opponent.rematch &&
+			!rematch && (
 				<React.Fragment>
-					<button onClick={acceptRematch}>Accept Rematch</button>
+					<button onClick={initiateRematch}>Accept Rematch</button>
 					<button>Decline Rematch</button>
 				</React.Fragment>
 			)}
