@@ -27,11 +27,7 @@ const startGame = () => {
 }
 
 io.on('connection', (socket) => {
-	//playerQueue.push(socket)
 	console.log(`Socket ${socket.id} has connected | Length of queue: ${playerQueue.length}`)
-	// if (playerQueue.length >= 2) {
-	// 	startGame()
-	// }
 
 	socket.on('findGame', (signal) => {
 		if (signal) {
@@ -55,16 +51,11 @@ io.on('connection', (socket) => {
 			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
 	})
 
-	// incomingObject = {
-	//     roomId,
-	//     opponent: {}
-	// }
 	socket.on('rematch', (data) => {
 		socket.to(data.roomId).emit('rematch', { ...data.opponent })
 	})
 
 	socket.on('disconnecting', () => {
-		// socket.to(socket.room)
 		socket.rooms.forEach((room) => {
 			socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 		})

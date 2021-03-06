@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useEffect, useContext } from 'react'
 import io from 'socket.io-client'
 
 import { UserContext } from './context/UserContext'
@@ -14,13 +14,10 @@ const App = () => {
 
 	const { socket, inQueue } = userState
 
-	//const [ socket, setSocket ] = useState(null)
-
 	useEffect(() => {
 		updateUserState({
 			socket: io(PORT)
 		})
-		//setSocket(io(PORT))
 	}, [])
 
 	useEffect(() => {

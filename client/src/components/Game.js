@@ -1,22 +1,15 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useContext } from 'react'
 import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 
 import { UserContext } from '../context/UserContext'
 import { GameContext } from '../context/GameContext'
 
-const initialState = {
-	initiate: false,
-	receive: false
-}
-
 const Game = () => {
 	const { userState, leaveQueue } = useContext(UserContext)
 	const { socket } = userState
 	const { gameState, updateGameState, rematchGameState, leaveGameState } = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
-
-	//const [ rematch, setRematch ] = useState(initialState)
 
 	useEffect(() => {
 		updateGameState({
