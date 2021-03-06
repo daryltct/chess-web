@@ -1,4 +1,5 @@
-const app = require('express')()
+const express = require('express')
+const app = express()
 const httpServer = require('http').createServer(app)
 const io = require('socket.io')(httpServer)
 const uniqid = require('uniqid')

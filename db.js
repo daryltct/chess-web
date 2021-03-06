@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 require('dotenv').config()
 
 const db = `mongodb+srv://admin:${process.env
-	.MONGODB_PASSWORD}@chess-web.masqo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
+	.MONGODB_PASSWORD}@chess-web.masqo.mongodb.net/chessWeb?retryWrites=true&w=majority`
 
 const connectDB = async () => {
 	try {
