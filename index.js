@@ -8,6 +8,11 @@ const connectDB = require('./db')
 // connect database
 connectDB()
 
+// routes & middleware
+app.use(express.json({ extended: false }))
+app.use('/api/users', require('./routes/users'))
+app.use('/api/auth', require('./routes/auth'))
+
 // player queue
 let playerQueue = []
 let activeRooms = []
