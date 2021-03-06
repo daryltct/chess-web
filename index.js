@@ -5,6 +5,7 @@ const uniqid = require('uniqid')
 
 // player queue
 let playerQueue = []
+let activeRooms = []
 
 const startGame = () => {
 	const player1 = playerQueue.shift()
@@ -53,6 +54,10 @@ io.on('connection', (socket) => {
 
 	socket.on('rematch', (data) => {
 		socket.to(data.roomId).emit('rematch', { ...data.opponent })
+	})
+
+	socket.on('leaveRoom', (data) => {
+		socket.to(data.roomId).emit('playerDisconnect', 'Opponent has disconnected')
 	})
 
 	socket.on('disconnecting', () => {

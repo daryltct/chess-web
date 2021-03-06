@@ -126,6 +126,30 @@ const Game = () => {
 		})
 	}
 
+	const declineRematch = () => {
+		updateGameState({
+			rematch: true,
+			opponent: {
+				id: opponent.id,
+				rematch: false
+			}
+		})
+		socket.emit('rematch', {
+			roomId,
+			opponent: {
+				id: socket.id,
+				rematch: false,
+				decline: true
+			}
+		})
+	}
+
+	const leaveGame = () => {
+		socket.emit('leaveRoom', { roomId })
+		leaveGameState()
+		leaveQueue()
+	}
+
 	return (
 		<div>
 			<Chessboard position={fen} onDrop={onDrop} orientation={color} draggable={turn === color.charAt(0)} />
@@ -141,9 +165,11 @@ const Game = () => {
 			!rematch && (
 				<React.Fragment>
 					<button onClick={initiateRematch}>Accept Rematch</button>
-					<button>Decline Rematch</button>
+					<button onClick={declineRematch}>Decline Rematch</button>
 				</React.Fragment>
 			)}
+			{opponent.decline && <h1>Opponent has declined rematch</h1>}
+			<button onClick={leaveGame}>Leave Game</button>
 		</div>
 	)
 }
