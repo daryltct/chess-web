@@ -6,7 +6,7 @@ import { UserContext } from '../context/user/UserContext'
 const Login = () => {
 	let history = useHistory()
 
-	const { login, userState, loadUser } = useContext(UserContext)
+	const { login, userState } = useContext(UserContext)
 	const { isLoggedIn } = userState
 
 	const [ user, setUser ] = useState({
@@ -17,7 +17,6 @@ const Login = () => {
 
 	useEffect(
 		() => {
-			loadUser()
 			if (isLoggedIn) {
 				history.push('/')
 			}

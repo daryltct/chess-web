@@ -13,7 +13,8 @@ export default (state, action) => {
 		case 'AUTH_ERROR':
 			sessionStorage.removeItem('token')
 			return {
-				...initialState
+				...initialState,
+				isLoading: false
 			}
 		case 'LOGIN_SUCCESS':
 			sessionStorage.setItem('token', action.payload.token)
@@ -27,7 +28,8 @@ export default (state, action) => {
 		case 'LOGIN_FAIL':
 			sessionStorage.removeItem('token')
 			return {
-				...initialState
+				...initialState,
+				isLoading: false
 			}
 		case 'JOIN_QUEUE':
 			return {

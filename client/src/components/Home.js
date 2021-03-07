@@ -2,14 +2,14 @@ import React, { useEffect, useContext } from 'react'
 import io from 'socket.io-client'
 
 import { UserContext } from '../context/user/UserContext'
-import { GameContext } from '../context/GameContext'
+import { GameContext } from '../context/game/GameContext'
 import Game from './Game'
 
 const PORT = '/'
 
 const Home = () => {
 	const { userState, updateUserState, joinQueue, leaveQueue } = useContext(UserContext)
-	const { gameState, updateGameState } = useContext(GameContext)
+	const { gameState, initRoom } = useContext(GameContext)
 
 	const { socket, inQueue } = userState
 
@@ -21,9 +21,7 @@ const Home = () => {
 
 	useEffect(() => {
 		if (socket) {
-			socket.on('gameStart', (data) => {
-				updateGameState(data)
-			})
+			socket.on('gameStart', initRoom)
 		}
 	})
 

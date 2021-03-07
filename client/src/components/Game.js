@@ -3,64 +3,78 @@ import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 
 import { UserContext } from '../context/user/UserContext'
-import { GameContext } from '../context/GameContext'
+import { GameContext } from '../context/game/GameContext'
 
 const Game = () => {
 	const { userState, leaveQueue } = useContext(UserContext)
 	const { socket } = userState
-	const { gameState, updateGameState, rematchGameState, leaveGameState } = useContext(GameContext)
+	const {
+		gameState,
+		initGame,
+		makeMove,
+		gameEnd,
+		receiveRematch,
+		initRematch,
+		declineRematch,
+		acceptRematch,
+		leaveGame
+	} = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
 
 	useEffect(() => {
-		updateGameState({
-			game: new Chess()
-		})
+		initGame()
+		// updateGameState({
+		// 	game: new Chess()
+		// })
 	}, [])
 
 	useEffect(
 		() => {
 			const moveHandler = (move) => {
 				game.move(move)
-				updateGameState({
-					fen: game.fen(),
-					history: game.history({ verbose: true }),
-					turn: game.turn()
-				})
+				makeMove()
+				// updateGameState({
+				// 	fen: game.fen(),
+				// 	history: game.history({ verbose: true }),
+				// 	turn: game.turn()
+				// })
 			}
 
 			const gameEndHandler = (data) => {
 				console.log(data)
 				const { move, winner, reason } = data
 				game.move(move)
-				updateGameState({
-					fen: game.fen(),
-					turn: 'z',
-					winner,
-					reason
-				})
+				gameEnd({ winner, reason })
+				// updateGameState({
+				// 	fen: game.fen(),
+				// 	turn: 'z',
+				// 	winner,
+				// 	reason
+				// })
 			}
 
-			const rematchHandler = (data) => {
-				updateGameState({
-					opponent: { ...data }
-				})
-			}
+			// const rematchHandler = (data) => {
+			// 	updateGameState({
+			// 		opponent: { ...data }
+			// 	})
+			// }
 
 			const opponentDisconnectHandler = (data) => {
-				leaveGameState()
+				//leaveGameState()
+				leaveGame()
 				leaveQueue()
 			}
 
 			if (socket && game) {
 				socket.on('move', moveHandler)
 				socket.on('gameEnd', gameEndHandler)
-				socket.on('rematch', rematchHandler)
+				socket.on('rematch', receiveRematch)
 				socket.on('playerDisconnect', opponentDisconnectHandler)
 
 				return () => {
 					socket.off('move', moveHandler)
 					socket.off('gameEnd', gameEndHandler)
-					socket.off('rematch', rematchHandler)
+					socket.off('rematch', receiveRematch)
 				}
 			}
 		},
@@ -72,7 +86,8 @@ const Game = () => {
 		() => {
 			if (gameState) {
 				if (opponent.rematch && rematch) {
-					rematchGameState(new Chess())
+					initRematch()
+					//rematchGameState(new Chess())
 				}
 			}
 		},
@@ -90,33 +105,37 @@ const Game = () => {
 		// if illegal move
 		if (move === null) return
 		// else alter game state
-		updateGameState({
-			fen: game.fen(),
-			history: game.history({ verbose: true }),
-			turn: game.turn()
-		})
+		makeMove()
+		// updateGameState({
+		// 	fen: game.fen(),
+		// 	history: game.history({ verbose: true }),
+		// 	turn: game.turn()
+		// })
 		// check winning conditions
 		if (game.in_checkmate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'checkmate' })
-			updateGameState({
-				winner: color,
-				reason: 'checkmate'
-			})
+			gameEnd({ winner: color, reason: 'checkmate' })
+			// updateGameState({
+			// 	winner: color,
+			// 	reason: 'checkmate'
+			// })
 		} else if (game.in_stalemate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'stalemate' })
-			updateGameState({
-				winner: color,
-				reason: 'stalemate'
-			})
+			gameEnd({ winner: color, reason: 'stalemate' })
+			// updateGameState({
+			// 	winner: color,
+			// 	reason: 'stalemate'
+			// })
 		} else {
 			socket.emit('move', { roomId, move })
 		}
 	}
 
 	const initiateRematch = () => {
-		updateGameState({
-			rematch: true
-		})
+		acceptRematch()
+		// updateGameState({
+		// 	rematch: true
+		// })
 		socket.emit('rematch', {
 			roomId,
 			opponent: {
@@ -126,14 +145,15 @@ const Game = () => {
 		})
 	}
 
-	const declineRematch = () => {
-		updateGameState({
-			rematch: true,
-			opponent: {
-				id: opponent.id,
-				rematch: false
-			}
-		})
+	const declineRematchHandler = () => {
+		declineRematch()
+		// updateGameState({
+		// 	rematch: true,
+		// 	opponent: {
+		// 		id: opponent.id,
+		// 		rematch: false
+		// 	}
+		// })
 		socket.emit('rematch', {
 			roomId,
 			opponent: {
@@ -144,9 +164,10 @@ const Game = () => {
 		})
 	}
 
-	const leaveGame = () => {
+	const leaveGameHandler = () => {
 		socket.emit('leaveRoom', { roomId })
-		leaveGameState()
+		leaveGame()
+		//leaveGameState()
 		leaveQueue()
 	}
 
@@ -165,11 +186,11 @@ const Game = () => {
 			!rematch && (
 				<React.Fragment>
 					<button onClick={initiateRematch}>Accept Rematch</button>
-					<button onClick={declineRematch}>Decline Rematch</button>
+					<button onClick={declineRematchHandler}>Decline Rematch</button>
 				</React.Fragment>
 			)}
 			{opponent.decline && <h1>Opponent has declined rematch</h1>}
-			<button onClick={leaveGame}>Leave Game</button>
+			<button onClick={leaveGameHandler}>Leave Game</button>
 		</div>
 	)
 }

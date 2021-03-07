@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 
-import { GameContextProvider } from './context/GameContext'
+import { GameContextProvider } from './context/game/GameContext'
 import { UserContextProvider } from './context/user/UserContext'
 
 ReactDOM.render(

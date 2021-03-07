@@ -67,6 +67,10 @@ const UserContextProvider = (props) => {
 		userDispatch({ type: 'LEAVE_QUEUE' })
 	}
 
+	if (userState.isLoading) {
+		loadUser()
+	}
+
 	return (
 		<UserContext.Provider value={{ userState, loadUser, login, updateUserState, joinQueue, leaveQueue }}>
 			{props.children}
