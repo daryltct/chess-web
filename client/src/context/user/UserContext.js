@@ -52,6 +52,16 @@ const UserContextProvider = (props) => {
 		}
 	}
 
+	// REGISTER
+	const register = async (form) => {
+		try {
+			const res = await axios.post('/api/users', form) // token
+			userDispatch({ type: 'REGISTER_SUCCESS', payload: res.data })
+		} catch (e) {
+			userDispatch({ type: 'REGISTER_FAIL', payload: e.response.data.msg })
+		}
+	}
+
 	// UPDATE USER STATE
 	const initSocket = (socket) => {
 		userDispatch({ type: 'INIT_SOCKET', payload: socket })
@@ -72,7 +82,7 @@ const UserContextProvider = (props) => {
 	}
 
 	return (
-		<UserContext.Provider value={{ userState, loadUser, login, initSocket, joinQueue, leaveQueue }}>
+		<UserContext.Provider value={{ userState, loadUser, login, register, initSocket, joinQueue, leaveQueue }}>
 			{props.children}
 		</UserContext.Provider>
 	)

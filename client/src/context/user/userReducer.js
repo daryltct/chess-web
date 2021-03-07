@@ -31,6 +31,21 @@ export default (state, action) => {
 				...initialState,
 				isLoading: false
 			}
+		case 'REGISTER_SUCCESS':
+			sessionStorage.setItem('token', action.payload.token)
+			return {
+				...state,
+				isLoggedIn: true,
+				isLoading: false,
+				isGuest: false,
+				token: action.payload.token
+			}
+		case 'REGISTER_FAIL':
+			sessionStorage.removeItem('token')
+			return {
+				...initialState,
+				isLoading: false
+			}
 		case 'JOIN_QUEUE':
 			return {
 				...state,
