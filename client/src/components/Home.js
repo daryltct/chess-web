@@ -8,15 +8,13 @@ import Game from './Game'
 const PORT = '/'
 
 const Home = () => {
-	const { userState, updateUserState, joinQueue, leaveQueue } = useContext(UserContext)
+	const { userState, initSocket, joinQueue, leaveQueue } = useContext(UserContext)
 	const { gameState, initRoom } = useContext(GameContext)
 
 	const { socket, inQueue } = userState
 
 	useEffect(() => {
-		updateUserState({
-			socket: io(PORT)
-		})
+		initSocket(io(PORT))
 	}, [])
 
 	useEffect(

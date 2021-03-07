@@ -41,10 +41,10 @@ export default (state, action) => {
 				...state,
 				inQueue: false
 			}
-		case 'UPDATE_USER':
+		case 'INIT_SOCKET':
 			return {
 				...state,
-				...action.payload
+				socket: action.payload
 			}
 		default:
 			return state

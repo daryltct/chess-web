@@ -53,8 +53,8 @@ const UserContextProvider = (props) => {
 	}
 
 	// UPDATE USER STATE
-	const updateUserState = (obj) => {
-		userDispatch({ type: 'UPDATE_USER', payload: obj })
+	const initSocket = (socket) => {
+		userDispatch({ type: 'INIT_SOCKET', payload: socket })
 	}
 
 	// JOIN QUEUE
@@ -72,7 +72,7 @@ const UserContextProvider = (props) => {
 	}
 
 	return (
-		<UserContext.Provider value={{ userState, loadUser, login, updateUserState, joinQueue, leaveQueue }}>
+		<UserContext.Provider value={{ userState, loadUser, login, initSocket, joinQueue, leaveQueue }}>
 			{props.children}
 		</UserContext.Provider>
 	)
