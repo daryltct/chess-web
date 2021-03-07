@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react'
 import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 
-import { UserContext } from '../context/UserContext'
+import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/GameContext'
 
 const Game = () => {

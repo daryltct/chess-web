@@ -1,7 +1,7 @@
 import React, { useEffect, useContext } from 'react'
 import io from 'socket.io-client'
 
-import { UserContext } from '../context/UserContext'
+import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/GameContext'
 import Game from './Game'
 
