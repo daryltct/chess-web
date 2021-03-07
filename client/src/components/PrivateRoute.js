@@ -5,7 +5,12 @@ import { UserContext } from '../context/UserContext'
 const PrivateRoute = ({ component: Component, ...rest }) => {
 	const { userState } = useContext(UserContext)
 
-	return <Route {...rest} render={(props) => (userState ? <Component {...props} /> : <Redirect to="/login" />)} />
+	return (
+		<Route
+			{...rest}
+			render={(props) => (userState.isLoggedIn ? <Component {...props} /> : <Redirect to="/login" />)}
+		/>
+	)
 }
 
 export default PrivateRoute
