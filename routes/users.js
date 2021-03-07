@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken') // for authorization
 require('dotenv').config()
 
 const User = require('../models/User')
+const { checkToken } = require('../utils/middleware')
 
 // POST api/users
 // register a user
@@ -69,11 +70,25 @@ router.post(
 	}
 )
 
-// PUT api/users/:id
+// PUT api/users/
 // update user
 // private access
-router.put('/:id', (req, res) => {
-	res.send('update user')
+router.put('/', checkToken, async (req, res) => {
+	const { name, games } = req.body
+
+	const updatedUser = {}
+	if (name) updatedUser.name = name
+	if (games) updatedUser.games = games
+
+	try {
+		const user = await await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select(
+			'-password'
+		)
+		res.json(user)
+	} catch (e) {
+		console.error(e)
+		res.status(500).send('Something went wrong')
+	}
 })
 
 module.exports = router
