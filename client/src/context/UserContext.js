@@ -2,11 +2,20 @@ import React, { createContext, useState } from 'react'
 
 const UserContext = createContext()
 
+const initialState = {
+	socket: null,
+	inQueue: false
+}
+
 const UserContextProvider = (props) => {
-	const [ userState, setUserState ] = useState({
-		socket: null,
-		inQueue: false
-	})
+	const [ userState, setUserState ] = useState(null)
+
+	const userLogin = (userObj) => {
+		setUserState({
+			...userObj,
+			...initialState
+		})
+	}
 
 	const updateUserState = (obj) => {
 		setUserState((prevState) => ({
@@ -30,7 +39,7 @@ const UserContextProvider = (props) => {
 	}
 
 	return (
-		<UserContext.Provider value={{ userState, updateUserState, joinQueue, leaveQueue }}>
+		<UserContext.Provider value={{ userState, userLogin, updateUserState, joinQueue, leaveQueue }}>
 			{props.children}
 		</UserContext.Provider>
 	)
