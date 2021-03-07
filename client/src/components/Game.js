@@ -1,5 +1,4 @@
 import React, { useEffect, useContext } from 'react'
-import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 
 import { UserContext } from '../context/user/UserContext'
@@ -23,9 +22,6 @@ const Game = () => {
 
 	useEffect(() => {
 		initGame()
-		// updateGameState({
-		// 	game: new Chess()
-		// })
 	}, [])
 
 	useEffect(
@@ -33,34 +29,15 @@ const Game = () => {
 			const moveHandler = (move) => {
 				game.move(move)
 				makeMove()
-				// updateGameState({
-				// 	fen: game.fen(),
-				// 	history: game.history({ verbose: true }),
-				// 	turn: game.turn()
-				// })
 			}
 
 			const gameEndHandler = (data) => {
-				console.log(data)
 				const { move, winner, reason } = data
 				game.move(move)
 				gameEnd({ winner, reason })
-				// updateGameState({
-				// 	fen: game.fen(),
-				// 	turn: 'z',
-				// 	winner,
-				// 	reason
-				// })
 			}
 
-			// const rematchHandler = (data) => {
-			// 	updateGameState({
-			// 		opponent: { ...data }
-			// 	})
-			// }
-
 			const opponentDisconnectHandler = (data) => {
-				//leaveGameState()
 				leaveGame()
 				leaveQueue()
 			}
@@ -75,6 +52,7 @@ const Game = () => {
 					socket.off('move', moveHandler)
 					socket.off('gameEnd', gameEndHandler)
 					socket.off('rematch', receiveRematch)
+					socket.off('playerDisconnect', opponentDisconnectHandler)
 				}
 			}
 		},
@@ -87,7 +65,6 @@ const Game = () => {
 			if (gameState) {
 				if (opponent.rematch && rematch) {
 					initRematch()
-					//rematchGameState(new Chess())
 				}
 			}
 		},
@@ -106,26 +83,13 @@ const Game = () => {
 		if (move === null) return
 		// else alter game state
 		makeMove()
-		// updateGameState({
-		// 	fen: game.fen(),
-		// 	history: game.history({ verbose: true }),
-		// 	turn: game.turn()
-		// })
 		// check winning conditions
 		if (game.in_checkmate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'checkmate' })
 			gameEnd({ winner: color, reason: 'checkmate' })
-			// updateGameState({
-			// 	winner: color,
-			// 	reason: 'checkmate'
-			// })
 		} else if (game.in_stalemate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'stalemate' })
 			gameEnd({ winner: color, reason: 'stalemate' })
-			// updateGameState({
-			// 	winner: color,
-			// 	reason: 'stalemate'
-			// })
 		} else {
 			socket.emit('move', { roomId, move })
 		}
@@ -133,9 +97,6 @@ const Game = () => {
 
 	const initiateRematch = () => {
 		acceptRematch()
-		// updateGameState({
-		// 	rematch: true
-		// })
 		socket.emit('rematch', {
 			roomId,
 			opponent: {
@@ -147,13 +108,6 @@ const Game = () => {
 
 	const declineRematchHandler = () => {
 		declineRematch()
-		// updateGameState({
-		// 	rematch: true,
-		// 	opponent: {
-		// 		id: opponent.id,
-		// 		rematch: false
-		// 	}
-		// })
 		socket.emit('rematch', {
 			roomId,
 			opponent: {
@@ -167,7 +121,6 @@ const Game = () => {
 	const leaveGameHandler = () => {
 		socket.emit('leaveRoom', { roomId })
 		leaveGame()
-		//leaveGameState()
 		leaveQueue()
 	}
 

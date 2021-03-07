@@ -19,11 +19,14 @@ const Home = () => {
 		})
 	}, [])
 
-	useEffect(() => {
-		if (socket) {
-			socket.on('gameStart', initRoom)
-		}
-	})
+	useEffect(
+		() => {
+			if (socket) {
+				socket.on('gameStart', initRoom)
+			}
+		},
+		[ socket ]
+	)
 
 	const toggleQueue = () => {
 		if (!inQueue) {
