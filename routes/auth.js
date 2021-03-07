@@ -6,12 +6,19 @@ const jwt = require('jsonwebtoken') // for authorization
 require('dotenv').config()
 
 const User = require('../models/User')
+const { checkToken } = require('../utils/middleware')
 
 // GET api/auth
 // retrieve logged in user
 // private access
-router.get('/', (req, res) => {
-	res.send('retrieve logged in user')
+router.get('/', checkToken, async (req, res) => {
+	try {
+		const user = await User.findById(req.user.id).select('-password')
+		res.json(user)
+	} catch (e) {
+		console.error(e)
+		res.status(500).send('Something went wrong')
+	}
 })
 
 // POST api/auth
