@@ -38,8 +38,9 @@ const Game = () => {
 			}
 
 			const opponentDisconnectHandler = (data) => {
-				leaveGame()
-				leaveQueue()
+				console.log('opponent disconnected')
+				// leaveGame()
+				// leaveQueue()
 			}
 
 			if (socket && game) {
@@ -91,7 +92,7 @@ const Game = () => {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'stalemate' })
 			gameEnd({ winner: color, reason: 'stalemate' })
 		} else {
-			socket.emit('move', { roomId, move })
+			socket.emit('move', { roomId, move, game })
 		}
 	}
 

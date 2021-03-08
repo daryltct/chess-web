@@ -11,7 +11,7 @@ const Home = () => {
 	const { userState, initSocket, joinQueue, leaveQueue } = useContext(UserContext)
 	const { gameState, initRoom } = useContext(GameContext)
 
-	const { socket, inQueue } = userState
+	const { socket, inQueue, user } = userState
 
 	useEffect(() => {
 		initSocket(io(PORT))
@@ -21,17 +21,22 @@ const Home = () => {
 		() => {
 			if (socket) {
 				socket.on('gameStart', initRoom)
+
+				return () => {
+					socket.off('gameStart', initRoom)
+				}
 			}
 		},
 		[ socket ]
 	)
 
 	const toggleQueue = () => {
+		// console.log(userState.user._id)
 		if (!inQueue) {
-			socket.emit('findGame', true)
+			socket.emit('findGame', { id: user._id, signal: true })
 			joinQueue()
 		} else {
-			socket.emit('findGame', false)
+			socket.emit('findGame', { id: user._id, signal: false })
 			leaveQueue()
 		}
 	}

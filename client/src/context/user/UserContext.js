@@ -47,6 +47,7 @@ const UserContextProvider = (props) => {
 		try {
 			const res = await axios.post('/api/auth', form) // token
 			userDispatch({ type: 'LOGIN_SUCCESS', payload: res.data })
+			loadUser()
 		} catch (e) {
 			userDispatch({ type: 'LOGIN_FAIL', payload: e.response.data.msg })
 		}
@@ -57,6 +58,7 @@ const UserContextProvider = (props) => {
 		try {
 			const res = await axios.post('/api/users', form) // token
 			userDispatch({ type: 'REGISTER_SUCCESS', payload: res.data })
+			loadUser()
 		} catch (e) {
 			userDispatch({ type: 'REGISTER_FAIL', payload: e.response.data.msg })
 		}

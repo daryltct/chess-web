@@ -5,6 +5,7 @@ const io = require('socket.io')(httpServer)
 const uniqid = require('uniqid')
 
 const connectDB = require('./db')
+const { closeRoom } = require('./utils/helper')
 
 // connect database
 connectDB()
@@ -32,7 +33,20 @@ const startGame = () => {
 	const roomId = uniqid() // generate random room id
 	whitePlayer.join(roomId)
 	blackPlayer.join(roomId)
-	console.log(roomId)
+
+	// add room to active rooms
+	activeRooms.push({
+		roomId,
+		players: [ whitePlayer.playerId, blackPlayer.playerId ],
+		white: {
+			playerId: whitePlayer.playerId,
+			isActive: true
+		},
+		black: {
+			playerId: blackPlayer.playerId,
+			isActive: true
+		}
+	})
 
 	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId, opponent: { id: blackPlayer.id, rematch: false } })
 	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId, opponent: { id: whitePlayer.id, rematch: false } })
@@ -41,8 +55,9 @@ const startGame = () => {
 io.on('connection', (socket) => {
 	console.log(`Socket ${socket.id} has connected | Length of queue: ${playerQueue.length}`)
 
-	socket.on('findGame', (signal) => {
-		if (signal) {
+	socket.on('findGame', (player) => {
+		if (player.signal) {
+			socket.playerId = player.id
 			playerQueue.push(socket)
 		} else {
 			playerQueue = playerQueue.filter((s) => socket.id !== s.id)
@@ -54,10 +69,25 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('move', (data) => {
+		// update active room: new game state
+		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
+		activeRooms[roomIndex].game = data.game
+		console.log(activeRooms)
+
 		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
 	})
 
 	socket.on('gameEnd', (data) => {
+		// update active room: swap players' color
+		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
+		const temp = activeRooms[roomIndex].white.playerId
+		activeRooms[roomIndex].white.playerId = activeRooms[roomIndex].black.playerId
+		activeRooms[roomIndex].black.playerId = temp
+
+		// update color on socket object
+		socket.color = socket.color === 'white' ? 'black' : 'white'
+		console.log(`${socket.playerId} is ${socket.color}`)
+
 		socket
 			.to(data.roomId)
 			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
@@ -73,6 +103,19 @@ io.on('connection', (socket) => {
 
 	socket.on('disconnecting', () => {
 		socket.rooms.forEach((room) => {
+			// check if room exists
+			const roomIndex = activeRooms.findIndex((r) => r.roomId == room)
+			if (roomIndex !== -1) {
+				// if is guest or other player is inactive, leave/close room
+				const oppColor = socket.color === 'white' ? 'black' : 'white'
+				if (!activeRooms[roomIndex][oppColor].isActive) {
+					closeRoom(room, activeRooms)
+				} else {
+					// if not guest, update active room: set isActive to false
+					activeRooms[roomIndex][socket.color].isActive = false
+				}
+			}
+			console.log(activeRooms)
 			socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 		})
 	})
