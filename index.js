@@ -23,6 +23,13 @@ const startGame = () => {
 	const player1 = playerQueue.shift()
 	const player2 = playerQueue.shift()
 
+	// prevent same account from playing with each other
+	if (player1.playerId === player2.playerId) {
+		playerQueue.push(player1)
+		playerQueue.push(player2)
+		return
+	}
+
 	const coinFlip = Math.random() > 0.5
 	const whitePlayer = coinFlip ? player1 : player2
 	const blackPlayer = coinFlip ? player2 : player1
