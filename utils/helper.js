@@ -2,7 +2,10 @@ const uniqid = require('uniqid')
 
 const attemptReconnect = (socket, activeRooms) => {
 	// check if player is in any active room
-	const roomIndex = activeRooms.findIndex((room) => room.players.includes(socket.playerId))
+	const roomIndex = activeRooms.findIndex((room) => {
+		const playerColor = room.white.playerId === socket.playerId ? 'white' : 'black'
+		return room.players.includes(socket.playerId) && !room[playerColor].isActive
+	})
 	if (roomIndex === -1) return // no active room
 
 	const recRoom = activeRooms[roomIndex]
