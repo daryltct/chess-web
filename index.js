@@ -30,13 +30,14 @@ io.on('connection', (socket) => {
 		} else {
 			// remove user from player queue
 			const playerIndex = playerQueue.findIndex((s) => s.id === socket.id)
-			playerQueue.splice(playerIndex, 1)
+			if (playerIndex !== -1) playerQueue.splice(playerIndex, 1)
 		}
 
 		if (playerQueue.length >= 2) {
 			startGame(playerQueue, activeRooms)
 		}
 		console.log(playerQueue.length)
+		playerQueue.map((soc) => console.log(soc.playerId))
 	})
 
 	socket.on('move', (data) => {
@@ -74,7 +75,7 @@ io.on('connection', (socket) => {
 	socket.on('disconnect', () => {
 		// remove user from player queue
 		const playerIndex = playerQueue.findIndex((s) => s.id === socket.id)
-		playerQueue.splice(playerIndex, 1)
+		if (playerIndex !== -1) playerQueue.splice(playerIndex, 1)
 
 		console.log(`Socket ${socket.id} has disconnected`)
 	})
