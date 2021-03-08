@@ -11,6 +11,7 @@ export const initialState = {
 	game: null,
 	fen: 'start',
 	history: [],
+	pgn: null,
 	turn: 'w',
 	winner: null,
 	reason: null,
@@ -68,6 +69,22 @@ const GameContextProvider = (props) => {
 		gameDispatch({ type: 'LEAVE_GAME' })
 	}
 
+	// RECONNECT TO GAME
+	const reconnectGame = (data) => {
+		console.log(data)
+		const { pgn } = data
+		// gameState.game = new Chess()
+		// gameState.game.load_pgn(pgn)
+		const newGame = new Chess()
+		newGame.load_pgn(pgn)
+		gameDispatch({
+			type: 'RECONNECT_GAME',
+			payload: { ...data, game: newGame, turn: newGame.turn(), fen: newGame.fen() }
+			//payload: { ...data }
+		})
+		// gameState.game.load(fen)
+	}
+
 	return (
 		<GameContext.Provider
 			value={{
@@ -80,7 +97,8 @@ const GameContextProvider = (props) => {
 				initRematch,
 				declineRematch,
 				acceptRematch,
-				leaveGame
+				leaveGame,
+				reconnectGame
 			}}
 		>
 			{props.children}

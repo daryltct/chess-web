@@ -21,7 +21,9 @@ const Game = () => {
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
 
 	useEffect(() => {
-		initGame()
+		if (!game) {
+			initGame()
+		}
 	}, [])
 
 	useEffect(
@@ -92,7 +94,7 @@ const Game = () => {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'stalemate' })
 			gameEnd({ winner: color, reason: 'stalemate' })
 		} else {
-			socket.emit('move', { roomId, move, game })
+			socket.emit('move', { roomId, move, pgn: game.pgn() })
 		}
 	}
 
@@ -145,6 +147,7 @@ const Game = () => {
 			)}
 			{opponent.decline && <h1>Opponent has declined rematch</h1>}
 			<button onClick={leaveGameHandler}>Leave Game</button>
+			<button onClick={() => console.log(game.pgn())}>print</button>
 		</div>
 	)
 }

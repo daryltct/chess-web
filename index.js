@@ -53,11 +53,28 @@ const startGame = () => {
 }
 
 io.on('connection', (socket) => {
-	console.log(`Socket ${socket.id} has connected | Length of queue: ${playerQueue.length}`)
+	console.log(`Socket ${socket.id} has connected`)
+	// attach playerId to socket
+	socket.playerId = socket.handshake.query.playerId
 
-	socket.on('findGame', (player) => {
-		if (player.signal) {
-			socket.playerId = player.id
+	// check if player is attempting to reconnect to an active room
+	const idx = activeRooms.findIndex((room) => room.players.includes(socket.playerId))
+	if (idx !== -1) {
+		const recRoom = activeRooms[idx]
+		const myColor = recRoom.white.playerId === socket.playerId ? 'white' : 'black'
+		socket.color = myColor
+		socket.join(recRoom.roomId)
+		socket.emit('reconnect', {
+			roomId: recRoom.roomId,
+			pgn: recRoom.pgn,
+			color: myColor,
+			opponent: { id: myColor === 'white' ? recRoom.black.playerId : recRoom.white.playerId, rematch: false }
+		})
+		activeRooms[idx][myColor].isActive = true
+	}
+
+	socket.on('findGame', (signal) => {
+		if (signal) {
 			playerQueue.push(socket)
 		} else {
 			playerQueue = playerQueue.filter((s) => socket.id !== s.id)
@@ -71,8 +88,7 @@ io.on('connection', (socket) => {
 	socket.on('move', (data) => {
 		// update active room: new game state
 		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
-		activeRooms[roomIndex].game = data.game
-		console.log(activeRooms)
+		activeRooms[roomIndex].pgn = data.pgn
 
 		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
 	})
@@ -83,10 +99,11 @@ io.on('connection', (socket) => {
 		const temp = activeRooms[roomIndex].white.playerId
 		activeRooms[roomIndex].white.playerId = activeRooms[roomIndex].black.playerId
 		activeRooms[roomIndex].black.playerId = temp
+		// set pgn to empty state
+		activeRooms[roomIndex].pgn = ''
 
 		// update color on socket object
 		socket.color = socket.color === 'white' ? 'black' : 'white'
-		console.log(`${socket.playerId} is ${socket.color}`)
 
 		socket
 			.to(data.roomId)
@@ -122,7 +139,7 @@ io.on('connection', (socket) => {
 
 	socket.on('disconnect', () => {
 		playerQueue = playerQueue.filter((s) => socket.id !== s.id)
-		console.log(`Socket ${socket.id} has disconnected | Length of queue: ${playerQueue.length}`)
+		console.log(`Socket ${socket.id} has disconnected`)
 	})
 })
 

@@ -9,21 +9,32 @@ const PORT = '/'
 
 const Home = () => {
 	const { userState, initSocket, joinQueue, leaveQueue } = useContext(UserContext)
-	const { gameState, initRoom } = useContext(GameContext)
+	const { gameState, initRoom, reconnectGame } = useContext(GameContext)
 
 	const { socket, inQueue, user } = userState
 
-	useEffect(() => {
-		initSocket(io(PORT))
-	}, [])
+	useEffect(
+		() => {
+			if (user) {
+				initSocket(
+					io(PORT, {
+						query: { playerId: user._id }
+					})
+				)
+			}
+		},
+		[ user ]
+	)
 
 	useEffect(
 		() => {
 			if (socket) {
 				socket.on('gameStart', initRoom)
+				socket.on('reconnect', reconnectGame)
 
 				return () => {
 					socket.off('gameStart', initRoom)
+					//socket.off('reconnect', (reconnectGame))
 				}
 			}
 		},
@@ -33,10 +44,10 @@ const Home = () => {
 	const toggleQueue = () => {
 		// console.log(userState.user._id)
 		if (!inQueue) {
-			socket.emit('findGame', { id: user._id, signal: true })
+			socket.emit('findGame', true)
 			joinQueue()
 		} else {
-			socket.emit('findGame', { id: user._id, signal: false })
+			socket.emit('findGame', false)
 			leaveQueue()
 		}
 	}

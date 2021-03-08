@@ -21,6 +21,7 @@ export default (state, action) => {
 				...state,
 				fen: state.game.fen(),
 				history: state.game.history({ verbose: true }),
+				pgn: state.game.pgn(),
 				turn: state.game.turn()
 			}
 		case 'GAME_END':
@@ -44,6 +45,7 @@ export default (state, action) => {
 				color: state.color === 'white' ? 'black' : 'white',
 				game: action.payload,
 				fen: 'start',
+				pgn: null,
 				opponent: {
 					id: state.opponent.id,
 					rematch: false
@@ -66,6 +68,14 @@ export default (state, action) => {
 		case 'LEAVE_GAME':
 			return {
 				...initialState
+			}
+		case 'RECONNECT_GAME':
+			const { game } = action.payload
+			return {
+				...state,
+				...action.payload
+				// fen: state.game.fen(),
+				// turn: state.game.turn()
 			}
 		default:
 			return state
