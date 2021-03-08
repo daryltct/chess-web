@@ -98,6 +98,7 @@ io.on('connection', (socket) => {
 		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
 		activeRooms[roomIndex].pgn = data.pgn // keeps track of state of the game
 
+		console.log(activeRooms)
 		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
 	})
 
@@ -110,15 +111,15 @@ io.on('connection', (socket) => {
 		// set pgn to empty state
 		activeRooms[roomIndex].pgn = ''
 
-		// update color on socket object
-		socket.color = socket.color === 'white' ? 'black' : 'white'
-
 		socket
 			.to(data.roomId)
 			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
 	})
 
 	socket.on('rematch', (data) => {
+		// update color on socket object
+		socket.color = socket.color === 'white' ? 'black' : 'white'
+
 		socket.to(data.roomId).emit('rematch', { ...data.opponent })
 	})
 
@@ -140,7 +141,7 @@ io.on('connection', (socket) => {
 					activeRooms[roomIndex][socket.color].isActive = false
 				}
 			}
-			console.log(activeRooms)
+			// console.log(activeRooms)
 			socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 		})
 	})
