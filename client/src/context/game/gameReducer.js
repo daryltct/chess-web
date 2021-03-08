@@ -70,12 +70,9 @@ export default (state, action) => {
 				...initialState
 			}
 		case 'RECONNECT_GAME':
-			const { game } = action.payload
 			return {
 				...state,
 				...action.payload
-				// fen: state.game.fen(),
-				// turn: state.game.turn()
 			}
 		default:
 			return state

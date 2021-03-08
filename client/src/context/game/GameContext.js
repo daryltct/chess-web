@@ -71,18 +71,14 @@ const GameContextProvider = (props) => {
 
 	// RECONNECT TO GAME
 	const reconnectGame = (data) => {
-		console.log(data)
 		const { pgn } = data
-		// gameState.game = new Chess()
-		// gameState.game.load_pgn(pgn)
 		const newGame = new Chess()
 		newGame.load_pgn(pgn)
+
 		gameDispatch({
 			type: 'RECONNECT_GAME',
 			payload: { ...data, game: newGame, turn: newGame.turn(), fen: newGame.fen() }
-			//payload: { ...data }
 		})
-		// gameState.game.load(fen)
 	}
 
 	return (

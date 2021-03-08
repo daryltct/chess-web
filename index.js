@@ -61,23 +61,24 @@ const startGame = () => {
 
 io.on('connection', (socket) => {
 	console.log(`Socket ${socket.id} has connected`)
-	// attach playerId to socket
-	socket.playerId = socket.handshake.query.playerId
+	socket.playerId = socket.handshake.query.playerId // attach playerId to socket
 
 	// check if player is attempting to reconnect to an active room
 	const idx = activeRooms.findIndex((room) => room.players.includes(socket.playerId))
+	// if room exists:
 	if (idx !== -1) {
 		const recRoom = activeRooms[idx]
-		const myColor = recRoom.white.playerId === socket.playerId ? 'white' : 'black'
-		socket.color = myColor
-		socket.join(recRoom.roomId)
+		const myColor = recRoom.white.playerId === socket.playerId ? 'white' : 'black' // check color of player
+		socket.color = myColor // attach color to socket
+		socket.join(recRoom.roomId) // re-join room
+		// return to client
 		socket.emit('reconnect', {
 			roomId: recRoom.roomId,
-			pgn: recRoom.pgn,
+			pgn: recRoom.pgn, // to restore game state
 			color: myColor,
 			opponent: { id: myColor === 'white' ? recRoom.black.playerId : recRoom.white.playerId, rematch: false }
 		})
-		activeRooms[idx][myColor].isActive = true
+		activeRooms[idx][myColor].isActive = true // reset isActive to true
 	}
 
 	socket.on('findGame', (signal) => {
@@ -95,7 +96,7 @@ io.on('connection', (socket) => {
 	socket.on('move', (data) => {
 		// update active room: new game state
 		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
-		activeRooms[roomIndex].pgn = data.pgn
+		activeRooms[roomIndex].pgn = data.pgn // keeps track of state of the game
 
 		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
 	})
@@ -127,10 +128,10 @@ io.on('connection', (socket) => {
 
 	socket.on('disconnecting', () => {
 		socket.rooms.forEach((room) => {
-			// check if room exists
+			// check if user is in an active room
 			const roomIndex = activeRooms.findIndex((r) => r.roomId == room)
 			if (roomIndex !== -1) {
-				// if is guest or other player is inactive, leave/close room
+				// if user is guest or other player is inactive, leave/close room
 				const oppColor = socket.color === 'white' ? 'black' : 'white'
 				if (!activeRooms[roomIndex][oppColor].isActive) {
 					closeRoom(room, activeRooms)
