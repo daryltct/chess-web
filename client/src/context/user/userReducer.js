@@ -1,3 +1,5 @@
+import uniqid from 'uniqid'
+
 import { initialState } from './UserContext'
 
 export default (state, action) => {
@@ -60,6 +62,19 @@ export default (state, action) => {
 			return {
 				...state,
 				socket: action.payload
+			}
+		case 'LOGIN_GUEST':
+			const randomId = uniqid('guest-')
+			return {
+				...state,
+				isLoggedIn: true,
+				isLoading: false,
+				isGuest: true,
+				token: null,
+				user: {
+					_id: randomId,
+					name: randomId.slice(0, 11)
+				}
 			}
 		default:
 			return state

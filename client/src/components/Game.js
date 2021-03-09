@@ -129,7 +129,7 @@ const Game = () => {
 
 	return (
 		<div>
-			<h1>{userState.user.email}</h1>
+			<h1>{userState.user.name}</h1>
 			<Chessboard position={fen} onDrop={onDrop} orientation={color} draggable={turn === color.charAt(0)} />
 			{winner && (
 				<div>

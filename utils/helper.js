@@ -55,7 +55,8 @@ const startGame = (playerQueue, activeRooms) => {
 		black: {
 			playerId: blackPlayer.playerId,
 			isActive: true
-		}
+		},
+		pgn: ''
 	})
 
 	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId, opponent: { id: blackPlayer.id, rematch: false } })
