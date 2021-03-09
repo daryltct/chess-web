@@ -90,7 +90,7 @@ const disconnectProcess = (socket, activeRooms) => {
 			const oppColor = socket.color === 'white' ? 'black' : 'white'
 			if (socket.playerId.substring(0, 5) === 'guest' || !activeRooms[roomIndex][oppColor].isActive) {
 				closeRoom(room, activeRooms)
-				socket.to(room).emit('playerLeft', 'Opponent has left the room')
+				socket.to(room).emit('playerLeave', 'Opponent has left the room')
 			} else {
 				// if not guest, update active room: set isActive to false
 				activeRooms[roomIndex][socket.color].isActive = false

@@ -4,7 +4,7 @@ const httpServer = require('http').createServer(app)
 const io = require('socket.io')(httpServer)
 
 const connectDB = require('./db')
-const { attemptReconnect, startGame, swapColor, disconnectProcess } = require('./utils/helper')
+const { attemptReconnect, startGame, swapColor, disconnectProcess, closeRoom } = require('./utils/helper')
 
 // connect database
 connectDB()
@@ -66,8 +66,9 @@ io.on('connection', (socket) => {
 		socket.to(data.roomId).emit('rematch', { ...data.opponent })
 	})
 
-	socket.on('leaveRoom', (data) => {
-		socket.to(data.roomId).emit('playerDisconnect', 'Opponent has disconnected')
+	socket.on('playerLeave', (data) => {
+		closeRoom(data.roomId, activeRooms)
+		socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
 	})
 
 	socket.on('disconnecting', () => {

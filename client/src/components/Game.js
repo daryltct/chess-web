@@ -51,12 +51,18 @@ const Game = () => {
 				resumeGame()
 			}
 
+			const playerLeaveHandler = (data) => {
+				leaveGame()
+				leaveQueue()
+			}
+
 			if (socket && game) {
 				socket.on('move', moveHandler)
 				socket.on('gameEnd', gameEndHandler)
 				socket.on('rematch', receiveRematch)
 				socket.on('playerDisconnect', opponentDisconnectHandler)
 				socket.on('playerReconnect', opponentReconnectHandler)
+				socket.on('playerLeave', playerLeaveHandler)
 
 				return () => {
 					socket.off('move', moveHandler)
@@ -64,6 +70,7 @@ const Game = () => {
 					socket.off('rematch', receiveRematch)
 					socket.off('playerDisconnect', opponentDisconnectHandler)
 					socket.off('playerReconnect', opponentReconnectHandler)
+					socket.off('playerLeave', playerLeaveHandler)
 				}
 			}
 		},
@@ -130,7 +137,7 @@ const Game = () => {
 	}
 
 	const leaveGameHandler = () => {
-		socket.emit('leaveRoom', { roomId })
+		socket.emit('playerLeave', { roomId })
 		leaveGame()
 		leaveQueue()
 	}
