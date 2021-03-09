@@ -87,7 +87,7 @@ const disconnectProcess = (socket, activeRooms) => {
 		if (roomIndex !== -1) {
 			// if user is guest or other player is inactive, leave/close room
 			const oppColor = socket.color === 'white' ? 'black' : 'white'
-			if (!activeRooms[roomIndex][oppColor].isActive) {
+			if (socket.playerId.substring(0, 5) === 'guest' || !activeRooms[roomIndex][oppColor].isActive) {
 				closeRoom(room, activeRooms)
 			} else {
 				// if not guest, update active room: set isActive to false
