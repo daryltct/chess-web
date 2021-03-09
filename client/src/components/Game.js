@@ -108,6 +108,9 @@ const Game = () => {
 		} else if (game.in_stalemate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'stalemate' })
 			gameEnd({ winner: color, reason: 'stalemate' })
+		} else if (game.in_draw()) {
+			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'draw' })
+			gameEnd({ winner: color, reason: 'draw' })
 		} else {
 			socket.emit('move', { roomId, move, pgn: game.pgn() })
 		}
@@ -148,7 +151,7 @@ const Game = () => {
 			<Chessboard position={fen} onDrop={onDrop} orientation={color} draggable={turn === color.charAt(0)} />
 			{winner && (
 				<div>
-					<h1>{`${winner} won by ${reason}`}</h1>
+					<h1>{reason === 'draw' ? "It's a draw" : `${winner} won by ${reason}`}</h1>
 					<button onClick={initiateRematch} disabled={rematch || opponent.rematch}>
 						Rematch
 					</button>
