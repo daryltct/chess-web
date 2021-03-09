@@ -19,6 +19,7 @@ const attemptReconnect = (socket, activeRooms) => {
 		color: myColor,
 		opponent: { id: myColor === 'white' ? recRoom.black.playerId : recRoom.white.playerId, rematch: false }
 	})
+	socket.to(recRoom.roomId).emit('playerReconnect')
 	activeRooms[roomIndex][myColor].isActive = true // reset isActive to true
 }
 
@@ -89,13 +90,13 @@ const disconnectProcess = (socket, activeRooms) => {
 			const oppColor = socket.color === 'white' ? 'black' : 'white'
 			if (socket.playerId.substring(0, 5) === 'guest' || !activeRooms[roomIndex][oppColor].isActive) {
 				closeRoom(room, activeRooms)
+				socket.to(room).emit('playerLeft', 'Opponent has left the room')
 			} else {
 				// if not guest, update active room: set isActive to false
 				activeRooms[roomIndex][socket.color].isActive = false
+				socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 			}
 		}
-
-		socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 	})
 }
 

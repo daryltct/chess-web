@@ -74,6 +74,16 @@ export default (state, action) => {
 				...state,
 				...action.payload
 			}
+		case 'PAUSE_GAME':
+			return {
+				...state,
+				turn: '-'
+			}
+		case 'RESUME_GAME':
+			return {
+				...state,
+				turn: state.game.turn()
+			}
 		default:
 			return state
 	}

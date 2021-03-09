@@ -81,6 +81,16 @@ const GameContextProvider = (props) => {
 		})
 	}
 
+	// PAUSE GAME
+	const pauseGame = () => {
+		gameDispatch({ type: 'PAUSE_GAME' })
+	}
+
+	// RESUME GAME
+	const resumeGame = () => {
+		gameDispatch({ type: 'RESUME_GAME' })
+	}
+
 	return (
 		<GameContext.Provider
 			value={{
@@ -94,7 +104,9 @@ const GameContextProvider = (props) => {
 				declineRematch,
 				acceptRematch,
 				leaveGame,
-				reconnectGame
+				reconnectGame,
+				pauseGame,
+				resumeGame
 			}}
 		>
 			{props.children}

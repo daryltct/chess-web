@@ -16,7 +16,9 @@ const Game = () => {
 		initRematch,
 		declineRematch,
 		acceptRematch,
-		leaveGame
+		leaveGame,
+		pauseGame,
+		resumeGame
 	} = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
 
@@ -41,8 +43,12 @@ const Game = () => {
 
 			const opponentDisconnectHandler = (data) => {
 				console.log('opponent disconnected')
-				// leaveGame()
-				// leaveQueue()
+				pauseGame()
+			}
+
+			const opponentReconnectHandler = (data) => {
+				console.log('opponent reconnected')
+				resumeGame()
 			}
 
 			if (socket && game) {
@@ -50,12 +56,14 @@ const Game = () => {
 				socket.on('gameEnd', gameEndHandler)
 				socket.on('rematch', receiveRematch)
 				socket.on('playerDisconnect', opponentDisconnectHandler)
+				socket.on('playerReconnect', opponentReconnectHandler)
 
 				return () => {
 					socket.off('move', moveHandler)
 					socket.off('gameEnd', gameEndHandler)
 					socket.off('rematch', receiveRematch)
 					socket.off('playerDisconnect', opponentDisconnectHandler)
+					socket.off('playerReconnect', opponentReconnectHandler)
 				}
 			}
 		},
