@@ -1,6 +1,7 @@
 const uniqid = require('uniqid')
 
 const User = require('../models/User')
+const Room = require('../models/Room')
 
 const attemptReconnect = (socket, activeRooms) => {
 	// check if player is in any active room
@@ -25,7 +26,7 @@ const attemptReconnect = (socket, activeRooms) => {
 	activeRooms[roomIndex][myColor].isActive = true // reset isActive to true
 }
 
-const startGame = (playerQueue, activeRooms) => {
+const startGame = async (playerQueue, activeRooms) => {
 	const player1 = playerQueue.shift()
 	const player2 = playerQueue.shift()
 
@@ -43,28 +44,44 @@ const startGame = (playerQueue, activeRooms) => {
 	whitePlayer.color = 'white'
 	blackPlayer.color = 'black'
 
-	const roomId = uniqid() // generate random room id
-	whitePlayer.join(roomId)
-	blackPlayer.join(roomId)
+	// retrieve both players' elo rating
+	// if one user is guest, match the guest's elo to the user
+	let whitePlayerElo = (blackPlayerElo = 1000)
+	if (whitePlayer.isGuest && !blackPlayer.isGuest) {
+		const blackPlayerDetails = await User.findById(blackPlayer.playerId)
+		whitePlayerElo = blackPlayerElo = blackPlayerDetails.games.elo
+	} else if (!whitePlayer.isGuest && blackPlayer.isGuest) {
+		const whitePlayerDetails = await User.findById(whitePlayer.playerId)
+		whitePlayerElo = blackPlayerElo = whitePlayerDetails.games.elo
+	} else if (!whitePlayer.isGuest && !blackPlayer.isGuest) {
+		const whitePlayerDetails = await User.findById(whitePlayer.playerId)
+		const blackPlayerDetails = await User.findById(blackPlayer.playerId)
+		whitePlayerElo = whitePlayerDetails.games.elo
+		blackPlayerElo = blackPlayerDetails.games.elo
+	}
 
-	// add room to active rooms
-	activeRooms.push({
-		roomId,
+	// create room and add to database
+	let room = new Room({
 		players: [ whitePlayer.playerId, blackPlayer.playerId ],
 		white: {
 			playerId: whitePlayer.playerId,
-			isActive: true
+			isActive: true,
+			elo: whitePlayerElo
 		},
 		black: {
 			playerId: blackPlayer.playerId,
-			isActive: true
-		},
-		pgn: '',
-		inProgress: true
+			isActive: true,
+			elo: blackPlayerElo
+		}
 	})
+	await room.save()
 
-	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId, opponent: { id: blackPlayer.id, rematch: false } })
-	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId, opponent: { id: whitePlayer.id, rematch: false } })
+	// add both players to same socket room
+	whitePlayer.join(room.id)
+	blackPlayer.join(room.id)
+
+	whitePlayer.emit('gameStart', { color: 'white', roomId: room.id, opponent: { id: blackPlayer.id, rematch: false } })
+	blackPlayer.emit('gameStart', { color: 'black', roomId: room.id, opponent: { id: whitePlayer.id, rematch: false } })
 }
 
 const swapColor = (roomId, activeRooms) => {

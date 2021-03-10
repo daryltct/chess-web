@@ -31,7 +31,10 @@ io.on('connection', (socket) => {
 	socket.playerId = socket.handshake.query.playerId // attach playerId to socket
 	// if not guest, attempt to reconnect
 	if (socket.playerId.substring(0, 5) !== 'guest') {
+		socket.isGuest = false
 		attemptReconnect(socket, activeRooms)
+	} else {
+		socket.isGuest = true
 	}
 
 	socket.on('findGame', (signal) => {
