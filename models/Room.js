@@ -40,7 +40,7 @@ const RoomSchema = mongoose.Schema({
 	},
 	createdAt: {
 		type: Date,
-		expires: 60, // delete room after 60s (testing)
+		expires: 3600, // delete room after 1h (testing)
 		default: Date.now
 	}
 })
