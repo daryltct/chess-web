@@ -5,7 +5,7 @@ import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
 
 const Game = () => {
-	const { userState, leaveQueue } = useContext(UserContext)
+	const { userState, leaveQueue, userWon } = useContext(UserContext)
 	const { socket } = userState
 	const {
 		gameState,
@@ -103,6 +103,7 @@ const Game = () => {
 		makeMove()
 		// check winning conditions
 		if (game.in_checkmate()) {
+			userWon() // CAUSING PROBLEM
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'checkmate' })
 			gameEnd({ winner: color, reason: 'checkmate' })
 		} else if (game.in_stalemate()) {

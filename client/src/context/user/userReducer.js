@@ -10,7 +10,8 @@ export default (state, action) => {
 				isLoggedIn: true,
 				isLoading: false,
 				isGuest: false,
-				user: action.payload
+				user: action.payload,
+				token: sessionStorage.token
 			}
 		case 'AUTH_ERROR':
 			sessionStorage.removeItem('token')
@@ -75,6 +76,11 @@ export default (state, action) => {
 					_id: randomId,
 					name: randomId.slice(0, 11)
 				}
+			}
+		case 'USER_WON':
+			return {
+				...state,
+				user: action.payload
 			}
 		default:
 			return state
