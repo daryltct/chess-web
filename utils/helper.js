@@ -1,5 +1,7 @@
 const uniqid = require('uniqid')
 
+const User = require('../models/User')
+
 const attemptReconnect = (socket, activeRooms) => {
 	// check if player is in any active room
 	const roomIndex = activeRooms.findIndex((room) => {
@@ -100,4 +102,43 @@ const disconnectProcess = (socket, activeRooms) => {
 	})
 }
 
-module.exports = { attemptReconnect, startGame, swapColor, closeRoom, disconnectProcess }
+// update/increment number of games/wins/loss of user on database depending on scenario
+// scenario can be any of the 3: 'win', 'loss', 'draw'
+const updateUserGames = async (userId, scenario) => {
+	if (userId.substring(0, 5) === 'guest') return
+
+	try {
+		switch (scenario) {
+			case 'win':
+				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1, 'games.wins': 1 } })
+			case 'loss':
+				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1, 'games.loss': 1 } })
+			case 'draw':
+				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1 } })
+			default:
+				return
+		}
+	} catch (e) {
+		console.error(e)
+	}
+}
+
+// upon game end, determine winner/loser and update stats accordingly
+const updateStatsOnGameEnd = (data, activeRooms) => {
+	const { roomId, winner, reason } = data
+
+	const roomIndex = activeRooms.findIndex((room) => room.roomId == roomId)
+	if (roomIndex === -1) return
+
+	const roomObj = activeRooms[roomIndex]
+	if (reason === 'draw') {
+		updateUserGames(roomObj.white.playerId, 'draw')
+		updateUserGames(roomObj.black.playerId, 'draw')
+	} else if (reason === 'checkmate' || reason === 'stalemate') {
+		const loser = winner === 'white' ? 'black' : 'white'
+		updateUserGames(roomObj[winner].playerId, 'win')
+		updateUserGames(roomObj[loser].playerId, 'loss')
+	}
+}
+
+module.exports = { attemptReconnect, startGame, swapColor, closeRoom, disconnectProcess, updateStatsOnGameEnd }

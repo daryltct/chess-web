@@ -4,7 +4,14 @@ const httpServer = require('http').createServer(app)
 const io = require('socket.io')(httpServer)
 
 const connectDB = require('./db')
-const { attemptReconnect, startGame, swapColor, disconnectProcess, closeRoom } = require('./utils/helper')
+const {
+	attemptReconnect,
+	startGame,
+	swapColor,
+	disconnectProcess,
+	closeRoom,
+	updateStatsOnGameEnd
+} = require('./utils/helper')
 
 // connect database
 connectDB()
@@ -52,6 +59,7 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('gameEnd', (data) => {
+		updateStatsOnGameEnd(data, activeRooms)
 		swapColor(data.roomId, activeRooms)
 
 		socket

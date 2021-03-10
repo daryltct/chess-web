@@ -81,14 +81,32 @@ router.put('/', checkToken, async (req, res) => {
 	if (games) updatedUser.games = games
 
 	try {
-		const user = await await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select(
-			'-password'
-		)
+		const user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
 		res.json(user)
 	} catch (e) {
 		console.error(e)
 		res.status(500).send('Something went wrong')
 	}
 })
+
+// router.put('/', checkToken, async (req, res) => {
+// 	const { name, games } = req.body
+
+// 	const updatedUser = {}
+// 	if (name) updatedUser.name = name
+// 	if (games) updatedUser.games = games
+
+// 	try {
+// 		const user = await User.findByIdAndUpdate(
+// 			req.user.id,
+// 			{ $inc: { 'games.total': 1, 'games.wins': 1 } },
+// 			{ new: true }
+// 		).select('-password')
+// 		res.json(user)
+// 	} catch (e) {
+// 		console.error(e)
+// 		res.status(500).send('Something went wrong')
+// 	}
+// })
 
 module.exports = router
