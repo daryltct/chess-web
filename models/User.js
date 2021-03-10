@@ -15,6 +15,10 @@ const UserSchema = mongoose.Schema({
 		required: true
 	},
 	games: {
+		elo: {
+			type: Number,
+			default: 1000
+		},
 		total: {
 			type: Number,
 			default: 0
