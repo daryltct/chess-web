@@ -4,6 +4,7 @@ const httpServer = require('http').createServer(app)
 const io = require('socket.io')(httpServer)
 
 const connectDB = require('./db')
+const Room = require('./models/Room')
 const {
 	attemptReconnect,
 	startGame,
@@ -49,18 +50,17 @@ io.on('connection', (socket) => {
 		if (playerQueue.length >= 2) {
 			startGame(playerQueue, activeRooms)
 		}
-		console.log(playerQueue.length)
-		playerQueue.map((soc) => console.log(soc.playerId))
 	})
 
-	socket.on('move', (data) => {
-		// update active room: new game state
-		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
-		activeRooms[roomIndex].pgn = data.pgn // keeps track of state of the game
-		activeRooms[roomIndex].inProgress = true // keeps track whether game has ended
+	socket.on('move', async (data) => {
+		try {
+			// update room in database with new game state
+			await Room.findByIdAndUpdate(data.roomId, { $set: { pgn: data.pgn, inProgress: true } })
 
-		console.log(activeRooms)
-		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
+			socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
+		} catch (e) {
+			console.error(e)
+		}
 	})
 
 	socket.on('gameEnd', (data) => {
