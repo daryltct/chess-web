@@ -10,7 +10,8 @@ const {
 	swapColor,
 	disconnectProcess,
 	closeRoom,
-	updateStatsOnGameEnd
+	updateStatsOnGameEnd,
+	updateUserGames
 } = require('./utils/helper')
 
 // connect database
@@ -53,6 +54,7 @@ io.on('connection', (socket) => {
 		// update active room: new game state
 		const roomIndex = activeRooms.findIndex((room) => room.roomId == data.roomId)
 		activeRooms[roomIndex].pgn = data.pgn // keeps track of state of the game
+		activeRooms[roomIndex].inProgress = true // keeps track whether game has ended
 
 		console.log(activeRooms)
 		socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
@@ -75,6 +77,21 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('playerLeave', (data) => {
+		const oppColor = socket.color === 'white' ? 'black' : 'white'
+		// if game is in progress:
+		const roomIndex = activeRooms.findIndex((room) => room.roomId === data.roomId)
+		const roomObj = activeRooms[roomIndex]
+		if (activeRooms[roomIndex].inProgress && roomIndex !== -1) {
+			// if opposing player is: active - player lose, opp win | inactive - player win, opp lose
+			if (roomObj[oppColor].isActive) {
+				updateUserGames(socket.playerId, 'loss')
+				updateUserGames(roomObj[oppColor].playerId, 'win')
+			} else {
+				updateUserGames(socket.playerId, 'win')
+				updateUserGames(roomObj[oppColor].playerId, 'loss')
+			}
+		}
+
 		closeRoom(data.roomId, activeRooms)
 		socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
 	})

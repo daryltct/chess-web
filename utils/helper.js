@@ -59,7 +59,8 @@ const startGame = (playerQueue, activeRooms) => {
 			playerId: blackPlayer.playerId,
 			isActive: true
 		},
-		pgn: ''
+		pgn: '',
+		inProgress: true
 	})
 
 	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId, opponent: { id: blackPlayer.id, rematch: false } })
@@ -130,6 +131,8 @@ const updateStatsOnGameEnd = (data, activeRooms) => {
 	const roomIndex = activeRooms.findIndex((room) => room.roomId == roomId)
 	if (roomIndex === -1) return
 
+	activeRooms[roomIndex].inProgress = false // game ended
+
 	const roomObj = activeRooms[roomIndex]
 	if (reason === 'draw') {
 		updateUserGames(roomObj.white.playerId, 'draw')
@@ -141,4 +144,12 @@ const updateStatsOnGameEnd = (data, activeRooms) => {
 	}
 }
 
-module.exports = { attemptReconnect, startGame, swapColor, closeRoom, disconnectProcess, updateStatsOnGameEnd }
+module.exports = {
+	attemptReconnect,
+	startGame,
+	swapColor,
+	closeRoom,
+	disconnectProcess,
+	updateUserGames,
+	updateStatsOnGameEnd
+}
