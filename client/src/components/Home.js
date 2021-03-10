@@ -18,7 +18,7 @@ const Home = () => {
 			if (user) {
 				initSocket(
 					io(PORT, {
-						query: { playerId: user._id }
+						query: { playerId: user._id, playerName: user.name }
 					})
 				)
 			}

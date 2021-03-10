@@ -66,11 +66,13 @@ const startGame = async (playerQueue, activeRooms) => {
 			players: [ whitePlayer.playerId, blackPlayer.playerId ],
 			white: {
 				playerId: whitePlayer.playerId,
+				playerName: whitePlayer.playerName,
 				isActive: true,
 				elo: whitePlayerElo
 			},
 			black: {
 				playerId: blackPlayer.playerId,
+				playerName: blackPlayer.playerName,
 				isActive: true,
 				elo: blackPlayerElo
 			}
@@ -84,12 +86,12 @@ const startGame = async (playerQueue, activeRooms) => {
 		whitePlayer.emit('gameStart', {
 			color: 'white',
 			roomId: room.id,
-			opponent: { id: blackPlayer.id, rematch: false }
+			opponent: { id: blackPlayer.playerId, name: blackPlayer.playerName, rematch: false }
 		})
 		blackPlayer.emit('gameStart', {
 			color: 'black',
 			roomId: room.id,
-			opponent: { id: whitePlayer.id, rematch: false }
+			opponent: { id: whitePlayer.playerId, name: whitePlayer.playerName, rematch: false }
 		})
 	} catch (e) {
 		console.error(e)

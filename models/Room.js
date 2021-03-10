@@ -7,6 +7,10 @@ const RoomSchema = mongoose.Schema({
 			type: String,
 			required: true
 		},
+		playerName: {
+			type: String,
+			required: true
+		},
 		isActive: {
 			type: Boolean,
 			required: true
@@ -18,6 +22,10 @@ const RoomSchema = mongoose.Schema({
 	},
 	black: {
 		playerId: {
+			type: String,
+			required: true
+		},
+		playerName: {
 			type: String,
 			required: true
 		},

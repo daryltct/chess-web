@@ -30,6 +30,8 @@ let activeRooms = []
 io.on('connection', (socket) => {
 	console.log(`Socket ${socket.id} has connected`)
 	socket.playerId = socket.handshake.query.playerId // attach playerId to socket
+	socket.playerName = socket.handshake.query.playerName // attach playerName to socket
+
 	// if not guest, attempt to reconnect
 	if (socket.playerId.substring(0, 5) !== 'guest') {
 		socket.isGuest = false
