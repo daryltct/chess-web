@@ -3,27 +3,38 @@ const uniqid = require('uniqid')
 const User = require('../models/User')
 const Room = require('../models/Room')
 
-const attemptReconnect = (socket, activeRooms) => {
-	// check if player is in any active room
-	const roomIndex = activeRooms.findIndex((room) => {
-		const playerColor = room.white.playerId === socket.playerId ? 'white' : 'black'
-		return room.players.includes(socket.playerId) && !room[playerColor].isActive
-	})
-	if (roomIndex === -1) return // no active room
+const attemptReconnect = async (socket, activeRooms) => {
+	try {
+		// check if user is in any active rooms
+		const room = await Room.findOne({
+			$or: [
+				{ $and: [ { 'white.playerId': socket.playerId }, { 'white.isActive': false } ] },
+				{ $and: [ { 'black.playerId': socket.playerId }, { 'black.isActive': false } ] }
+			]
+		})
 
-	const recRoom = activeRooms[roomIndex]
-	const myColor = recRoom.white.playerId === socket.playerId ? 'white' : 'black' // check color of player
-	socket.color = myColor // attach color to socket
-	socket.join(recRoom.roomId) // re-join room
+		if (!room) return
 
-	socket.emit('reconnect', {
-		roomId: recRoom.roomId,
-		pgn: recRoom.pgn, // to restore game state
-		color: myColor,
-		opponent: { id: myColor === 'white' ? recRoom.black.playerId : recRoom.white.playerId, rematch: false }
-	})
-	socket.to(recRoom.roomId).emit('playerReconnect')
-	activeRooms[roomIndex][myColor].isActive = true // reset isActive to true
+		// check player color and attach to socket
+		const myColor = room.white.playerId === socket.playerId ? 'white' : 'black'
+		socket.color = myColor
+		console.log(room.id)
+		socket.join(room.id)
+
+		// update room state that user is active
+		await Room.findByIdAndUpdate(room.id, { $set: { [myColor + '.isActive']: true } })
+
+		const oppColor = myColor === 'white' ? 'black' : 'white'
+		socket.emit('reconnect', {
+			roomId: room.id,
+			pgn: room.pgn, // to restore game state
+			color: myColor,
+			opponent: { id: room[oppColor].playerId, name: room[oppColor].playerName, rematch: false }
+		})
+		socket.to(room.id).emit('playerReconnect')
+	} catch (e) {
+		console.error(e)
+	}
 }
 
 const startGame = async (playerQueue, activeRooms) => {
