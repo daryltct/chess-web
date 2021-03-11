@@ -25,7 +25,6 @@ app.use('/api/auth', require('./routes/auth'))
 
 // player queue
 let playerQueue = []
-let activeRooms = []
 
 io.on('connection', (socket) => {
 	console.log(`Socket ${socket.id} has connected`)
@@ -35,7 +34,7 @@ io.on('connection', (socket) => {
 	// if not guest, attempt to reconnect
 	if (socket.playerId.substring(0, 5) !== 'guest') {
 		socket.isGuest = false
-		attemptReconnect(socket, activeRooms)
+		attemptReconnect(socket)
 	} else {
 		socket.isGuest = true
 	}
@@ -50,7 +49,7 @@ io.on('connection', (socket) => {
 		}
 
 		if (playerQueue.length >= 2) {
-			startGame(playerQueue, activeRooms)
+			startGame(playerQueue)
 		}
 	})
 
@@ -66,8 +65,8 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('gameEnd', (data) => {
-		updateStatsOnGameEnd(data, activeRooms)
-		swapColor(data.roomId, activeRooms)
+		updateStatsOnGameEnd(data)
+		swapColor(data.roomId)
 
 		socket
 			.to(data.roomId)
@@ -81,28 +80,47 @@ io.on('connection', (socket) => {
 		socket.to(data.roomId).emit('rematch', { ...data.opponent })
 	})
 
-	socket.on('playerLeave', (data) => {
+	socket.on('playerLeave', async (data) => {
 		const oppColor = socket.color === 'white' ? 'black' : 'white'
-		// if game is in progress:
-		const roomIndex = activeRooms.findIndex((room) => room.roomId === data.roomId)
-		const roomObj = activeRooms[roomIndex]
-		if (activeRooms[roomIndex].inProgress && roomIndex !== -1) {
+		try {
+			const room = await Room.findById(data.roomId)
+			if (!room || !room.inProgress) return
+
+			// if game is in progress
 			// if opposing player is: active - player lose, opp win | inactive - player win, opp lose
-			if (roomObj[oppColor].isActive) {
+			if (room[oppColor].isActive) {
 				updateUserGames(socket.playerId, 'loss')
-				updateUserGames(roomObj[oppColor].playerId, 'win')
+				updateUserGames(room[oppColor].playerId, 'win')
 			} else {
 				updateUserGames(socket.playerId, 'win')
-				updateUserGames(roomObj[oppColor].playerId, 'loss')
+				updateUserGames(room[oppColor].playerId, 'loss')
 			}
+			// close the room
+			closeRoom(data.roomId)
+			socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
+		} catch (e) {
+			console.error(e)
 		}
+		// // if game is in progress:
+		// const roomIndex = activeRooms.findIndex((room) => room.roomId === data.roomId)
+		// const roomObj = activeRooms[roomIndex]
+		// if (activeRooms[roomIndex].inProgress && roomIndex !== -1) {
+		// 	// if opposing player is: active - player lose, opp win | inactive - player win, opp lose
+		// 	if (roomObj[oppColor].isActive) {
+		// 		updateUserGames(socket.playerId, 'loss')
+		// 		updateUserGames(roomObj[oppColor].playerId, 'win')
+		// 	} else {
+		// 		updateUserGames(socket.playerId, 'win')
+		// 		updateUserGames(roomObj[oppColor].playerId, 'loss')
+		// 	}
+		// }
 
-		closeRoom(data.roomId, activeRooms)
-		socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
+		// closeRoom(data.roomId)
+		// socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
 	})
 
 	socket.on('disconnecting', () => {
-		disconnectProcess(socket, activeRooms)
+		disconnectProcess(socket)
 	})
 
 	socket.on('disconnect', () => {
