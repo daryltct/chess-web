@@ -1,3 +1,6 @@
+const EloRank = require('elo-rank')
+const elo = new EloRank(32) // k-factor = 32
+
 const User = require('../models/User')
 const Room = require('../models/Room')
 
@@ -153,17 +156,30 @@ const disconnectProcess = (socket) => {
 
 // update/increment number of games/wins/loss of user on database depending on scenario
 // scenario can be any of the 3: 'win', 'loss', 'draw'
-const updateUserGames = async (userId, scenario) => {
+const updateUserGames = async (userId, scenario, currentElo, expectedScore) => {
 	if (userId.substring(0, 5) === 'guest') return
 
+	let updatedElo
 	try {
 		switch (scenario) {
 			case 'win':
-				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1, 'games.wins': 1 } })
+				updatedElo = elo.updateRating(expectedScore, 1, currentElo)
+				return await User.findByIdAndUpdate(userId, {
+					$inc: { 'games.total': 1, 'games.wins': 1 },
+					$set: { 'games.elo': updatedElo }
+				})
 			case 'loss':
-				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1, 'games.loss': 1 } })
+				updatedElo = elo.updateRating(expectedScore, 0, currentElo)
+				return await User.findByIdAndUpdate(userId, {
+					$inc: { 'games.total': 1, 'games.loss': 1 },
+					$set: { 'games.elo': updatedElo }
+				})
 			case 'draw':
-				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1 } })
+				updatedElo = elo.updateRating(expectedScore, 0.5, currentElo)
+				return await User.findByIdAndUpdate(userId, {
+					$inc: { 'games.total': 1 },
+					$set: { 'games.elo': updatedElo }
+				})
 			default:
 				return
 		}
@@ -180,14 +196,18 @@ const updateStatsOnGameEnd = async (data) => {
 		// update room in database
 		const room = await Room.findByIdAndUpdate(roomId, { $set: { inProgress: false } }, { new: true })
 
+		// calculate expected score to update elo rating
+		room.white.expectedScore = elo.getExpected(room.white.elo, room.black.elo)
+		room.black.expectedScore = elo.getExpected(room.black.elo, room.white.elo)
+
 		// update user stats based on winning condition
 		if (reason === 'draw') {
-			updateUserGames(room.white.playerId, 'draw')
-			updateUserGames(room.black.playerId, 'draw')
+			updateUserGames(room.white.playerId, 'draw', room.white.elo, room.white.expectedScore)
+			updateUserGames(room.black.playerId, 'draw', room.black.elo, room.black.expectedScore)
 		} else if (reason === 'checkmate' || reason === 'stalemate') {
 			const loser = winner === 'white' ? 'black' : 'white'
-			updateUserGames(room[winner].playerId, 'win')
-			updateUserGames(room[loser].playerId, 'loss')
+			updateUserGames(room[winner].playerId, 'win', room[winner].elo, room[winner].expectedScore)
+			updateUserGames(room[loser].playerId, 'loss', room[loser].elo, room[loser].expectedScore)
 		}
 	} catch (e) {
 		console.error(e)

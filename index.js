@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const httpServer = require('http').createServer(app)
 const io = require('socket.io')(httpServer)
+const EloRank = require('elo-rank')
+const elo = new EloRank(32) // k-factor = 32
 
 const connectDB = require('./db')
 const Room = require('./models/Room')
@@ -86,14 +88,18 @@ io.on('connection', (socket) => {
 			const room = await Room.findById(data.roomId)
 			if (!room || !room.inProgress) return
 
+			// calculate expected score to update elo rating
+			const myExpectedScore = elo.getExpected(room[socket.color].elo, room[oppColor].elo)
+			const oppExpectedScore = elo.getExpected(room[oppColor].elo, room[socket.color].elo)
+
 			// if game is in progress
 			// if opposing player is: active - player lose, opp win | inactive - player win, opp lose
 			if (room[oppColor].isActive) {
-				updateUserGames(socket.playerId, 'loss')
-				updateUserGames(room[oppColor].playerId, 'win')
+				updateUserGames(socket.playerId, 'loss', room[socket.color].elo, myExpectedScore)
+				updateUserGames(room[oppColor].playerId, 'win', room[oppColor].elo, oppExpectedScore)
 			} else {
-				updateUserGames(socket.playerId, 'win')
-				updateUserGames(room[oppColor].playerId, 'loss')
+				updateUserGames(socket.playerId, 'win', room[socket.color].elo, myExpectedScore)
+				updateUserGames(room[oppColor].playerId, 'loss', room[oppColor].elo, oppExpectedScore)
 			}
 			// close the room
 			closeRoom(data.roomId)
