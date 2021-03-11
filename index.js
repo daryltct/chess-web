@@ -101,22 +101,6 @@ io.on('connection', (socket) => {
 		} catch (e) {
 			console.error(e)
 		}
-		// // if game is in progress:
-		// const roomIndex = activeRooms.findIndex((room) => room.roomId === data.roomId)
-		// const roomObj = activeRooms[roomIndex]
-		// if (activeRooms[roomIndex].inProgress && roomIndex !== -1) {
-		// 	// if opposing player is: active - player lose, opp win | inactive - player win, opp lose
-		// 	if (roomObj[oppColor].isActive) {
-		// 		updateUserGames(socket.playerId, 'loss')
-		// 		updateUserGames(roomObj[oppColor].playerId, 'win')
-		// 	} else {
-		// 		updateUserGames(socket.playerId, 'win')
-		// 		updateUserGames(roomObj[oppColor].playerId, 'loss')
-		// 	}
-		// }
-
-		// closeRoom(data.roomId)
-		// socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
 	})
 
 	socket.on('disconnecting', () => {

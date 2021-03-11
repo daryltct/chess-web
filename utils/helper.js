@@ -1,9 +1,7 @@
-const uniqid = require('uniqid')
-
 const User = require('../models/User')
 const Room = require('../models/Room')
 
-const attemptReconnect = async (socket, activeRooms) => {
+const attemptReconnect = async (socket) => {
 	try {
 		// check if user is in any active rooms
 		const room = await Room.findOne({
@@ -37,7 +35,7 @@ const attemptReconnect = async (socket, activeRooms) => {
 	}
 }
 
-const startGame = async (playerQueue, activeRooms) => {
+const startGame = async (playerQueue) => {
 	const player1 = playerQueue.shift()
 	const player2 = playerQueue.shift()
 
@@ -109,7 +107,7 @@ const startGame = async (playerQueue, activeRooms) => {
 	}
 }
 
-const swapColor = async (roomId, activeRooms) => {
+const swapColor = async (roomId) => {
 	try {
 		const room = await Room.findById(roomId)
 
@@ -120,7 +118,7 @@ const swapColor = async (roomId, activeRooms) => {
 	}
 }
 
-const closeRoom = async (roomId, roomsArr) => {
+const closeRoom = async (roomId) => {
 	try {
 		await Room.findByIdAndDelete(roomId)
 	} catch (e) {
@@ -128,7 +126,7 @@ const closeRoom = async (roomId, roomsArr) => {
 	}
 }
 
-const disconnectProcess = (socket, activeRooms) => {
+const disconnectProcess = (socket) => {
 	// iterate through every room that socket is in
 	socket.rooms.forEach(async (room) => {
 		if (room == socket.id) return
@@ -175,12 +173,12 @@ const updateUserGames = async (userId, scenario) => {
 }
 
 // upon game end, determine winner/loser and update stats accordingly
-const updateStatsOnGameEnd = async (data, activeRooms) => {
+const updateStatsOnGameEnd = async (data) => {
 	const { roomId, winner, reason } = data
 
 	try {
 		// update room in database
-		const room = await Room.findByIdAndUpdate(data.roomId, { $set: { inProgress: false } }, { new: true })
+		const room = await Room.findByIdAndUpdate(roomId, { $set: { inProgress: false } }, { new: true })
 
 		// update user stats based on winning condition
 		if (reason === 'draw') {
