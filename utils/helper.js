@@ -120,27 +120,35 @@ const swapColor = async (roomId, activeRooms) => {
 	}
 }
 
-const closeRoom = (roomId, roomsArr) => {
-	const idx = roomsArr.findIndex((room) => room.roomId == roomId)
-	roomsArr.splice(idx, 1)
+const closeRoom = async (roomId, roomsArr) => {
+	try {
+		await Room.findByIdAndDelete(roomId)
+	} catch (e) {
+		console.error(e)
+	}
 }
 
 const disconnectProcess = (socket, activeRooms) => {
 	// iterate through every room that socket is in
-	socket.rooms.forEach((room) => {
-		// check if room is active
-		const roomIndex = activeRooms.findIndex((r) => r.roomId == room)
-		if (roomIndex !== -1) {
-			// if user is guest or other player is inactive, leave/close room
+	socket.rooms.forEach(async (room) => {
+		if (room == socket.id) return
+
+		try {
+			const fetchedRoom = await Room.findById(room)
+			if (!fetchedRoom) return
+
 			const oppColor = socket.color === 'white' ? 'black' : 'white'
-			if (socket.playerId.substring(0, 5) === 'guest' || !activeRooms[roomIndex][oppColor].isActive) {
-				closeRoom(room, activeRooms)
+			// if user is guest or other player is inactive, close room
+			if (socket.isGuest || !fetchedRoom[oppColor].isActive) {
+				closeRoom(room)
 				socket.to(room).emit('playerLeave', 'Opponent has left the room')
 			} else {
-				// if not guest, update active room: set isActive to false
-				activeRooms[roomIndex][socket.color].isActive = false
+				// update room state that user is inactive
+				await Room.findByIdAndUpdate(room, { $set: { [socket.color + '.isActive']: false } })
 				socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 			}
+		} catch (e) {
+			console.error(e)
 		}
 	})
 }
