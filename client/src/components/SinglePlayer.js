@@ -3,14 +3,17 @@ import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
+const LEVELS = [ { level: 1, desc: 'Rookie' }, { level: 2, desc: 'Intermediate' }, { level: 3, desc: 'Advanced' } ]
+
 const SinglePlayer = () => {
 	const [ gameState, setGameState ] = useState({
+		level: null,
 		game: null,
 		fen: 'start',
 		turn: 'w',
 		winner: null
 	})
-	const { game, fen, turn } = gameState
+	const { level, game, fen, turn } = gameState
 
 	useEffect(() => {
 		setGameState((prevState) => ({
@@ -32,19 +35,22 @@ const SinglePlayer = () => {
 		try {
 			game.move(sourceSquare, targetSquare)
 			updateStateOnMove()
-
-			// // AI make move
-			// game.aiMove(3)
-			// updateStateOnMove()
 		} catch (e) {
 			console.log(e)
 		}
 	}
 
+	const selectLevel = (level) => {
+		setGameState((prevState) => ({
+			...prevState,
+			level
+		}))
+	}
+
 	useEffect(
 		() => {
 			const invokeAI = () => {
-				game.aiMove(2)
+				game.aiMove(level)
 				updateStateOnMove()
 			}
 			if (game && turn === 'b') {
@@ -54,7 +60,21 @@ const SinglePlayer = () => {
 		[ updateStateOnMove ]
 	)
 
-	return game && <Chessboard position={fen} onDrop={onDrop} draggable={turn === 'w' ? true : false} />
+	const levelSelectionDisplay = (
+		<div>
+			<h1>Select Difficulty</h1>
+			{LEVELS.map((obj) => <button onClick={() => selectLevel(obj.level)}>{obj.desc}</button>)}
+		</div>
+	)
+
+	return (
+		game &&
+		(level ? (
+			<Chessboard position={fen} onDrop={onDrop} draggable={turn === 'w' ? true : false} />
+		) : (
+			levelSelectionDisplay
+		))
+	)
 }
 
 export default SinglePlayer
