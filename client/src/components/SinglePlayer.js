@@ -6,13 +6,11 @@ import { Game } from 'js-chess-engine'
 const SinglePlayer = () => {
 	const [ gameState, setGameState ] = useState({
 		game: null,
-		color: null,
 		fen: 'start',
 		turn: 'w',
-		winner: null,
-		reason: null
+		winner: null
 	})
-	const { game, color, fen, turn } = gameState
+	const { game, fen, turn } = gameState
 
 	useEffect(() => {
 		setGameState((prevState) => ({
@@ -21,44 +19,42 @@ const SinglePlayer = () => {
 		}))
 	}, [])
 
-	useEffect(
-		() => {
-			const updateFen = () => {
-				setGameState((prevState) => ({
-					...prevState,
-					fen: game.exportFEN()
-				}))
-			}
-			if (game) {
-				updateFen()
-			}
-		},
-		[ game ]
-	)
-
-	const onDrop = ({ sourceSquare, targetSquare }) => {
-		// check if the move is legal
-		let newMove = game.move(sourceSquare, targetSquare)
-
-		// if illegal move
-		if (newMove === null) return
-		// else alter game state
+	const updateStateOnMove = () => {
 		setGameState((prevState) => ({
 			...prevState,
 			fen: game.exportFEN(),
-			turn: 'b'
-		}))
-
-		// AI make move
-		game.aiMove()
-		setGameState((prevState) => ({
-			...prevState,
-			fen: game.exportFEN(),
-			turn: 'w'
+			turn: prevState.turn === 'w' ? 'b' : 'w'
 		}))
 	}
 
-	return game && <Chessboard position={fen} onDrop={onDrop} />
+	const onDrop = ({ sourceSquare, targetSquare }) => {
+		// check if the move is legal
+		try {
+			game.move(sourceSquare, targetSquare)
+			updateStateOnMove()
+
+			// // AI make move
+			// game.aiMove(3)
+			// updateStateOnMove()
+		} catch (e) {
+			console.log(e)
+		}
+	}
+
+	useEffect(
+		() => {
+			const invokeAI = () => {
+				game.aiMove(2)
+				updateStateOnMove()
+			}
+			if (game && turn === 'b') {
+				setTimeout(invokeAI, 500)
+			}
+		},
+		[ updateStateOnMove ]
+	)
+
+	return game && <Chessboard position={fen} onDrop={onDrop} draggable={turn === 'w' ? true : false} />
 }
 
 export default SinglePlayer
