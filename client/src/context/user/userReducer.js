@@ -77,11 +77,6 @@ export default (state, action) => {
 					name: randomId.slice(0, 11)
 				}
 			}
-		case 'USER_WON':
-			return {
-				...state,
-				user: action.payload
-			}
 		default:
 			return state
 	}

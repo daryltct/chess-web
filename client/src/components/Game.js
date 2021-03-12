@@ -5,7 +5,7 @@ import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
 
 const Game = () => {
-	const { userState, leaveQueue, userWon } = useContext(UserContext)
+	const { userState, leaveQueue } = useContext(UserContext)
 	const { socket } = userState
 	const {
 		gameState,

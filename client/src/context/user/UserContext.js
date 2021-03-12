@@ -84,30 +84,13 @@ const UserContextProvider = (props) => {
 		userDispatch({ type: 'LOGIN_GUEST' })
 	}
 
-	// USER WON
-	const userWon = async () => {
-		const { user: { games } } = userState
-		try {
-			const res = await axios.put('/api/users', {
-				games: {
-					total: games.total + 1,
-					wins: games.wins + 1,
-					loss: games.loss
-				}
-			})
-			userDispatch({ type: 'USER_WON', payload: res.data })
-		} catch (e) {
-			userDispatch({ type: 'USER_UPDATE_ERROR', payload: e.response.data.msg })
-		}
-	}
-
 	if (userState.isLoading) {
 		loadUser()
 	}
 
 	return (
 		<UserContext.Provider
-			value={{ userState, loadUser, login, register, initSocket, joinQueue, leaveQueue, loginGuest, userWon }}
+			value={{ userState, loadUser, login, register, initSocket, joinQueue, leaveQueue, loginGuest }}
 		>
 			{props.children}
 		</UserContext.Provider>

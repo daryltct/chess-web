@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import Chess from 'chess.js'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
