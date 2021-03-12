@@ -6,6 +6,7 @@ import PrivateRoute from './components/PrivateRoute'
 import Home from './components/Home'
 import Login from './components/Login'
 import Register from './components/Register'
+import SinglePlayer from './components/SinglePlayer'
 
 const App = () => {
 	return (
@@ -14,6 +15,7 @@ const App = () => {
 				<PrivateRoute exact path="/" component={Home} />
 				<Route exact path="/login" component={Login} />
 				<Route exact path="/register" component={Register} />
+				<Route exact path="/single" component={SinglePlayer} />
 			</Switch>
 		</Router>
 	)
