@@ -10,10 +10,11 @@ const SinglePlayer = () => {
 		level: null,
 		game: null,
 		fen: 'start',
-		turn: 'w',
+		turn: 'white',
+		isFinished: false,
 		winner: null
 	})
-	const { level, game, fen, turn } = gameState
+	const { level, game, fen, turn, isFinished, winner } = gameState
 
 	useEffect(() => {
 		setGameState((prevState) => ({
@@ -22,12 +23,31 @@ const SinglePlayer = () => {
 		}))
 	}, [])
 
+	useEffect(
+		() => {
+			if (isFinished) {
+				setGameState((prevState) => ({
+					...prevState,
+					winner: prevState.turn === 'white' ? 'black' : 'white',
+					turn: '-'
+				}))
+			}
+		},
+		[ isFinished ]
+	)
+
 	const updateStateOnMove = () => {
 		setGameState((prevState) => ({
 			...prevState,
 			fen: game.exportFEN(),
-			turn: prevState.turn === 'w' ? 'b' : 'w'
+			turn: prevState.turn === 'white' ? 'black' : 'white',
+			isFinished: game.exportJson().isFinished
 		}))
+	}
+
+	const invokeAI = () => {
+		game.aiMove(level - 1)
+		updateStateOnMove()
 	}
 
 	const onDrop = ({ sourceSquare, targetSquare }) => {
@@ -35,6 +55,11 @@ const SinglePlayer = () => {
 		try {
 			game.move(sourceSquare, targetSquare)
 			updateStateOnMove()
+
+			// if game has not ended, invoke chess ai
+			if (!game.exportJson().isFinished) {
+				setTimeout(invokeAI, 500)
+			}
 		} catch (e) {
 			console.log(e)
 		}
@@ -47,19 +72,6 @@ const SinglePlayer = () => {
 		}))
 	}
 
-	useEffect(
-		() => {
-			const invokeAI = () => {
-				game.aiMove(level)
-				updateStateOnMove()
-			}
-			if (game && turn === 'b') {
-				setTimeout(invokeAI, 500)
-			}
-		},
-		[ updateStateOnMove ]
-	)
-
 	const levelSelectionDisplay = (
 		<div>
 			<h1>Select Difficulty</h1>
@@ -68,12 +80,16 @@ const SinglePlayer = () => {
 	)
 
 	return (
-		game &&
-		(level ? (
-			<Chessboard position={fen} onDrop={onDrop} draggable={turn === 'w' ? true : false} />
-		) : (
-			levelSelectionDisplay
-		))
+		<div>
+			{game &&
+				(level ? (
+					<Chessboard position={fen} onDrop={onDrop} draggable={turn === 'white'} />
+				) : (
+					levelSelectionDisplay
+				))}
+			{turn === 'black' && <h2>loading...</h2>}
+			{winner && <h1>{winner === 'white' ? 'YOU WIN' : 'YOU LOSE'}</h1>}
+		</div>
 	)
 }
 
