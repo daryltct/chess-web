@@ -2,6 +2,8 @@ import './App.css'
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
+import Header from './components/ui/Header'
+
 import PrivateRoute from './components/PrivateRoute'
 import Home from './components/Home'
 import Login from './components/Login'
@@ -11,6 +13,7 @@ import SinglePlayer from './components/SinglePlayer'
 const App = () => {
 	return (
 		<Router>
+			<Header />
 			<Switch>
 				<PrivateRoute exact path="/" component={Home} />
 				<Route exact path="/login" component={Login} />
