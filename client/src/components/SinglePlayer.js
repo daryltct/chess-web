@@ -10,9 +10,6 @@ import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, LinearProgress, Divider } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
-	// mainContainer: {
-	// 	padding: '20px'
-	// },
 	levelButtons: {
 		...theme.typography.buttons,
 		height: '80px',
