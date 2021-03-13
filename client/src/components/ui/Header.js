@@ -2,27 +2,67 @@ import React, { Fragment, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { makeStyles } from '@material-ui/styles'
-import { AppBar, Toolbar, Typography, Tabs, Tab } from '@material-ui/core'
+import {
+	useMediaQuery,
+	AppBar,
+	Toolbar,
+	Typography,
+	Tabs,
+	Tab,
+	SwipeableDrawer,
+	IconButton,
+	List,
+	ListItem,
+	ListItemText
+} from '@material-ui/core'
+import { useTheme } from '@material-ui/core/styles'
 import VideogameAssetIcon from '@material-ui/icons/VideogameAsset'
+import MenuIcon from '@material-ui/icons/Menu'
 
 const useStyles = makeStyles((theme) => ({
 	headerMargin: {
 		...theme.mixins.toolbar,
-		marginBottom: '2em'
+		marginBottom: '2.5em',
+		[theme.breakpoints.down('sm')]: {
+			marginBottom: '1.5em'
+		}
 	},
 	logoMargin: {
 		marginRight: '8px'
 	},
 	header: {
-		height: '6em'
+		height: '6em',
+		[theme.breakpoints.down('sm')]: {
+			height: '5.5em'
+		}
 	},
 	tabContainer: {
 		marginLeft: 'auto'
 	},
 	tab: {
-		fontSize: '1.4rem',
+		...theme.typography.tab,
 		minWidth: '30px',
 		marginLeft: '25px'
+	},
+	drawerIcon: {
+		marginLeft: 'auto',
+		color: '#fff',
+		'&:hover': {
+			backgroundColor: 'transparent'
+		}
+	},
+	drawer: {
+		backgroundColor: theme.palette.common.crayola
+	},
+	drawerItemContainer: {
+		height: '5em',
+		width: '15em'
+	},
+	drawerItem: {
+		...theme.typography.tab
+	},
+	appbar: {
+		zIndex: theme.zIndex.modal + 1
 	}
 }))
 
@@ -33,9 +73,13 @@ const routes = [
 ]
 
 const Header = () => {
+	const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent)
 	const classes = useStyles()
+	const theme = useTheme()
+	const isSmall = useMediaQuery(theme.breakpoints.down('sm'))
 
 	const [ active, setActive ] = useState(0)
+	const [ openDrawer, setOpenDrawer ] = useState(false)
 
 	// prevent active tab from defaulting upon refresh
 	useEffect(
@@ -59,17 +103,63 @@ const Header = () => {
 		setActive(value)
 	}
 
+	const tabs = (
+		<Fragment>
+			<Tabs className={classes.tabContainer} value={active} onChange={changeTab}>
+				{routes.map((route, index) => (
+					<Tab key={index} className={classes.tab} label={route.name} component={Link} to={route.link} />
+				))}
+			</Tabs>
+		</Fragment>
+	)
+
+	const drawer = (
+		<Fragment>
+			<SwipeableDrawer
+				disableBackdropTransition={!iOS}
+				disableDiscovery={iOS}
+				anchor="right"
+				classes={{ paper: classes.drawer }}
+				open={openDrawer}
+				onClose={() => setOpenDrawer(false)}
+				onOpen={() => setOpenDrawer(true)}
+			>
+				<div className={classes.headerMargin} />
+				<List disablePadding>
+					{routes.map((route, index) => (
+						<ListItem
+							key={index}
+							divider
+							button
+							component={Link}
+							to={route.link}
+							selected={active === route.activeIndex}
+							onClick={() => {
+								setOpenDrawer(false)
+								setActive(route.activeIndex)
+							}}
+							className={classes.drawerItemContainer}
+						>
+							<ListItemText className={classes.drawerItem} disableTypography>
+								{route.name}
+							</ListItemText>
+						</ListItem>
+					))}
+				</List>
+			</SwipeableDrawer>
+			<IconButton className={classes.drawerIcon} onClick={() => setOpenDrawer(!openDrawer)}>
+				<MenuIcon />
+			</IconButton>
+		</Fragment>
+	)
+
 	return (
 		<Fragment>
-			<AppBar elevation={0}>
+			<AppBar elevation={0} className={classes.appbar}>
 				<Toolbar className={classes.header}>
 					<VideogameAssetIcon fontSize="large" className={classes.logoMargin} />
-					<Typography variant="h4">PLAYING CHESS...</Typography>
-					<Tabs className={classes.tabContainer} value={active} onChange={changeTab}>
-						<Tab className={classes.tab} label="Lobby" component={Link} to="/" />
-						<Tab className={classes.tab} label="Single Player" component={Link} to="/single" />
-						<Tab className={classes.tab} label="Profile" component={Link} to="/profile" />
-					</Tabs>
+					<Typography variant={isSmall ? 'h5' : 'h4'}>PLAYING CHESS...</Typography>
+					{isSmall ? drawer : tabs}
 				</Toolbar>
 			</AppBar>
 			<div className={classes.headerMargin} />

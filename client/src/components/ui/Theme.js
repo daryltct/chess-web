@@ -20,7 +20,12 @@ const theme = createMuiTheme({
 		}
 	},
 	typography: {
-		fontFamily: 'VT323, Courier New, monospace'
+		fontFamily: 'VT323, Courier New, monospace',
+		tab: {
+			fontFamily: 'VT323, Courier New, monospace',
+			fontSize: '1.4rem',
+			color: '#fff'
+		}
 	}
 })
 
