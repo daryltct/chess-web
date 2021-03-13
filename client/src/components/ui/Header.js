@@ -1,5 +1,7 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
+
+import { UserContext } from '../../context/user/UserContext'
 
 import { makeStyles } from '@material-ui/styles'
 import {
@@ -10,6 +12,7 @@ import {
 	Tabs,
 	Tab,
 	SwipeableDrawer,
+	Button,
 	IconButton,
 	List,
 	ListItem,
@@ -25,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
 		marginBottom: '2.5em',
 		[theme.breakpoints.down('sm')]: {
 			marginBottom: '1.5em'
+		}
+	},
+	logo: {
+		padding: 0,
+		color: '#fff',
+		'&:hover': {
+			backgroundColor: 'transparent'
 		}
 	},
 	logoMargin: {
@@ -78,6 +88,8 @@ const Header = () => {
 	const theme = useTheme()
 	const isSmall = useMediaQuery(theme.breakpoints.down('sm'))
 
+	const { userState: { isLoggedIn, inQueue } } = useContext(UserContext)
+
 	const [ active, setActive ] = useState(0)
 	const [ openDrawer, setOpenDrawer ] = useState(false)
 
@@ -107,7 +119,14 @@ const Header = () => {
 		<Fragment>
 			<Tabs className={classes.tabContainer} value={active} onChange={changeTab}>
 				{routes.map((route, index) => (
-					<Tab key={index} className={classes.tab} label={route.name} component={Link} to={route.link} />
+					<Tab
+						key={index}
+						className={classes.tab}
+						label={route.name}
+						component={Link}
+						to={route.link}
+						disabled={inQueue}
+					/>
 				))}
 			</Tabs>
 		</Fragment>
@@ -157,9 +176,11 @@ const Header = () => {
 		<Fragment>
 			<AppBar elevation={0} className={classes.appbar}>
 				<Toolbar className={classes.header}>
-					<VideogameAssetIcon fontSize="large" className={classes.logoMargin} />
-					<Typography variant={isSmall ? 'h5' : 'h4'}>PLAYING CHESS...</Typography>
-					{isSmall ? drawer : tabs}
+					<Button className={classes.logo} component={Link} to="/" disableRipple onClick={() => setActive(0)}>
+						<VideogameAssetIcon fontSize="large" className={classes.logoMargin} />
+						<Typography variant={isSmall ? 'h5' : 'h4'}>PLAYING CHESS...</Typography>
+					</Button>
+					{isLoggedIn && (isSmall ? drawer : tabs)}
 				</Toolbar>
 			</AppBar>
 			<div className={classes.headerMargin} />
