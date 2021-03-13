@@ -1,22 +1,55 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { Fragment, useState, useEffect, useContext } from 'react'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
 import { UserContext } from '../context/user/UserContext'
 
+import { makeStyles } from '@material-ui/styles'
+import { useTheme } from '@material-ui/core/styles'
+import { useMediaQuery, Grid, Typography, Button, LinearProgress, Divider } from '@material-ui/core'
+
+const useStyles = makeStyles((theme) => ({
+	mainContainer: {
+		padding: '20px'
+	},
+	levelButtons: {
+		...theme.typography.buttons,
+		height: '80px',
+		margin: '20px 0px 20px 0px'
+	},
+	rematchButton: {
+		...theme.typography.buttons,
+		height: '60px',
+		marginTop: '10px',
+		[theme.breakpoints.down('xs')]: {
+			height: '50px',
+			fontSize: '1.2rem'
+		}
+	},
+	endGameMsg: {
+		marginTop: '10px'
+	}
+}))
+
+const initialState = {
+	level: null,
+	game: null,
+	fen: 'start',
+	turn: 'white',
+	isFinished: false,
+	winner: null
+}
+
 const LEVELS = [ { level: 1, desc: 'Rookie' }, { level: 2, desc: 'Intermediate' }, { level: 3, desc: 'Advanced' } ]
 
 const SinglePlayer = () => {
+	const classes = useStyles()
+	const theme = useTheme()
+	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
+
 	const { userState: { socket } } = useContext(UserContext)
 
-	const [ gameState, setGameState ] = useState({
-		level: null,
-		game: null,
-		fen: 'start',
-		turn: 'white',
-		isFinished: false,
-		winner: null
-	})
+	const [ gameState, setGameState ] = useState(initialState)
 	const { level, game, fen, turn, isFinished, winner } = gameState
 
 	useEffect(() => {
@@ -24,7 +57,9 @@ const SinglePlayer = () => {
 			...prevState,
 			game: new Game()
 		}))
-		socket.close()
+		if (socket) {
+			socket.close()
+		}
 	}, [])
 
 	useEffect(
@@ -76,24 +111,63 @@ const SinglePlayer = () => {
 		}))
 	}
 
+	const startRematch = () => {
+		setGameState({
+			...initialState,
+			game: new Game()
+		})
+	}
+
 	const levelSelectionDisplay = (
-		<div>
-			<h1>Select Difficulty</h1>
-			{LEVELS.map((obj) => <button onClick={() => selectLevel(obj.level)}>{obj.desc}</button>)}
-		</div>
+		<Fragment>
+			<Typography variant="h4" align="center" gutterBottom color="primary">
+				SELECT DIFFICULTY
+			</Typography>
+			{LEVELS.map((obj) => (
+				<Button
+					className={classes.levelButtons}
+					variant="contained"
+					color="primary"
+					onClick={() => selectLevel(obj.level)}
+				>
+					{obj.desc}
+				</Button>
+			))}
+		</Fragment>
 	)
 
 	return (
-		<div>
-			{game &&
-				(level ? (
-					<Chessboard position={fen} onDrop={onDrop} draggable={turn === 'white'} />
-				) : (
-					levelSelectionDisplay
-				))}
-			{turn === 'black' && <h2>loading...</h2>}
-			{winner && <h1>{winner === 'white' ? 'YOU WIN' : 'YOU LOSE'}</h1>}
-		</div>
+		<Grid container direction="column" alignContent="center" className={classes.mainContainer}>
+			<Grid container item direction="column" alignContent="center">
+				{game &&
+					(level ? (
+						<Chessboard
+							position={fen}
+							onDrop={onDrop}
+							draggable={turn === 'white'}
+							width={isXS ? 320 : 560}
+						/>
+					) : (
+						levelSelectionDisplay
+					))}
+				{turn === 'black' && <LinearProgress />}
+				{winner && (
+					<Fragment>
+						<Typography variant={isXS ? 'h5' : 'h4'} align="center" className={classes.endGameMsg}>
+							{winner === 'white' ? 'YOU WON, REMATCH?' : 'YOU LOST, TRY AGAIN?'}
+						</Typography>
+						<Button
+							className={classes.rematchButton}
+							variant="contained"
+							color="primary"
+							onClick={startRematch}
+						>
+							Rematch
+						</Button>
+					</Fragment>
+				)}
+			</Grid>
+		</Grid>
 	)
 }
 

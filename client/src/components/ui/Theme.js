@@ -25,6 +25,9 @@ const theme = createMuiTheme({
 			fontFamily: 'VT323, Courier New, monospace',
 			fontSize: '1.4rem',
 			color: '#fff'
+		},
+		buttons: {
+			fontSize: '1.4rem'
 		}
 	}
 })
