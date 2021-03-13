@@ -18,6 +18,9 @@ const theme = createMuiTheme({
 		secondary: {
 			main: `${mint}`
 		}
+	},
+	typography: {
+		fontFamily: 'VT323, Courier New, monospace'
 	}
 })
 

@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 		marginLeft: 'auto'
 	},
 	tab: {
-		fontSize: '1rem',
+		fontSize: '1.4rem',
 		minWidth: '30px',
 		marginLeft: '25px'
 	}
@@ -64,7 +64,7 @@ const Header = () => {
 			<AppBar elevation={0}>
 				<Toolbar className={classes.header}>
 					<VideogameAssetIcon fontSize="large" className={classes.logoMargin} />
-					<Typography variant="h5">Play Chess</Typography>
+					<Typography variant="h4">PLAYING CHESS...</Typography>
 					<Tabs className={classes.tabContainer} value={active} onChange={changeTab}>
 						<Tab className={classes.tab} label="Lobby" component={Link} to="/" />
 						<Tab className={classes.tab} label="Single Player" component={Link} to="/single" />
