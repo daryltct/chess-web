@@ -3,15 +3,16 @@ import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
 import { UserContext } from '../context/user/UserContext'
+import useMainStyles from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, LinearProgress, Divider } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
-	mainContainer: {
-		padding: '20px'
-	},
+	// mainContainer: {
+	// 	padding: '20px'
+	// },
 	levelButtons: {
 		...theme.typography.buttons,
 		height: '80px',
@@ -43,6 +44,7 @@ const initialState = {
 const LEVELS = [ { level: 1, desc: 'Rookie' }, { level: 2, desc: 'Intermediate' }, { level: 3, desc: 'Advanced' } ]
 
 const SinglePlayer = () => {
+	const mainClasses = useMainStyles()
 	const classes = useStyles()
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
@@ -123,8 +125,9 @@ const SinglePlayer = () => {
 			<Typography variant="h4" align="center" gutterBottom color="primary">
 				SELECT DIFFICULTY
 			</Typography>
-			{LEVELS.map((obj) => (
+			{LEVELS.map((obj, index) => (
 				<Button
+					key={index}
 					className={classes.levelButtons}
 					variant="contained"
 					color="primary"
@@ -137,7 +140,7 @@ const SinglePlayer = () => {
 	)
 
 	return (
-		<Grid container direction="column" alignContent="center" className={classes.mainContainer}>
+		<Grid container direction="column" alignContent="center" className={mainClasses.mainContainer}>
 			<Grid container item direction="column" alignContent="center">
 				{game &&
 					(level ? (
