@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
+
+import { UserContext } from '../context/user/UserContext'
 
 const LEVELS = [ { level: 1, desc: 'Rookie' }, { level: 2, desc: 'Intermediate' }, { level: 3, desc: 'Advanced' } ]
 
 const SinglePlayer = () => {
+	const { userState: { socket } } = useContext(UserContext)
+
 	const [ gameState, setGameState ] = useState({
 		level: null,
 		game: null,
@@ -20,6 +24,7 @@ const SinglePlayer = () => {
 			...prevState,
 			game: new Game()
 		}))
+		socket.close()
 	}, [])
 
 	useEffect(
