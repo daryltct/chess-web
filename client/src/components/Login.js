@@ -20,9 +20,6 @@ const useStyles = makeStyles((theme) => ({
 	orLabel: {
 		marginTop: '10px'
 	},
-	newLabel: {
-		margin: '20px 0px 10px 0px'
-	},
 	paper: {
 		position: 'absolute',
 		width: 400,
@@ -190,7 +187,7 @@ const Login = () => {
 
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<hr />
-				<Typography variant="h5" align="center" className={classes.newLabel}>
+				<Typography variant="h5" align="center" className={mainClasses.loginAndRegisterFooterLabel}>
 					NEW USER?
 				</Typography>
 

@@ -17,6 +17,9 @@ const useMainStyles = makeStyles((theme) => ({
 			height: '50px',
 			fontSize: '1.2rem'
 		}
+	},
+	loginAndRegisterFooterLabel: {
+		margin: '20px 0px 10px 0px'
 	}
 }))
 

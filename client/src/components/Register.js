@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, Link } from 'react-router-dom'
 
 import { UserContext } from '../context/user/UserContext'
+import useMainStyles from './ui/Styles'
+
+import { Grid, Typography, Button, TextField } from '@material-ui/core'
 
 const Register = () => {
 	let history = useHistory()
+	const mainClasses = useMainStyles()
 
 	const { register, userState } = useContext(UserContext)
 	const { isLoggedIn } = userState
@@ -39,21 +43,70 @@ const Register = () => {
 	}
 
 	return (
-		<div>
-			<h1>Register Page</h1>
-			<form onSubmit={handleSubmit}>
-				<label htmlFor="email">Email Address</label>
-				<input name="email" type="email" value={email} onChange={handleChange} />
+		<Grid container direction="column" alignContent="center" className={mainClasses.mainContainer} spacing={3}>
+			<Typography variant="h4" align="center" gutterBottom color="primary">
+				REGISTRATION
+			</Typography>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<TextField
+					name="email"
+					type="email"
+					value={email}
+					label="Email Address"
+					onChange={handleChange}
+					variant="outlined"
+					fullWidth
+				/>
+			</Grid>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<TextField
+					name="name"
+					type="text"
+					value={name}
+					label="Name"
+					onChange={handleChange}
+					variant="outlined"
+					fullWidth
+				/>
+			</Grid>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<TextField
+					name="password"
+					type="password"
+					value={password}
+					label="Password"
+					onChange={handleChange}
+					variant="outlined"
+					fullWidth
+				/>
+			</Grid>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<Button
+					className={mainClasses.loginAndRegisterButton}
+					variant="contained"
+					color="primary"
+					onClick={handleSubmit}
+				>
+					Register
+				</Button>
+			</Grid>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<hr />
+				<Typography variant="h5" align="center" className={mainClasses.loginAndRegisterFooterLabel}>
+					ALREADY HAVE AN ACCOUNT?
+				</Typography>
 
-				<label htmlFor="name">Name</label>
-				<input name="name" type="text" value={name} onChange={handleChange} />
-
-				<label htmlFor="password">Password</label>
-				<input name="password" type="password" value={password} onChange={handleChange} />
-
-				<input type="submit" value="Register" />
-			</form>
-		</div>
+				<Button
+					className={mainClasses.loginAndRegisterButton}
+					variant="contained"
+					color="primary"
+					component={Link}
+					to="/login"
+				>
+					Login
+				</Button>
+			</Grid>
+		</Grid>
 	)
 }
 
