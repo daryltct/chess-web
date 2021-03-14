@@ -41,6 +41,14 @@ const useStyles = makeStyles((theme) => ({
 			height: '40px',
 			fontSize: '1.1rem'
 		}
+	},
+	orderedList: {
+		margin: '0px 0px 10px 0px',
+		paddingLeft: '20px',
+		fontFamily: theme.typography.fontFamily
+	},
+	listItem: {
+		marginBottom: '5px'
 	}
 }))
 
@@ -97,14 +105,14 @@ const Login = () => {
 						</Typography>
 					</Grid>
 					<Grid item>
-						<Typography>
-							<ol style={{ margin: '0px 0px 10px 0px', paddingLeft: '20px' }}>
-								<li>KEEP TRACK OF YOUR PROGRESS (GAMES, WINS, LOSS, RATING)</li>
-								<li>ABILITY TO RECONNECT TO GAMES</li>
-								<li>PRIORITY QUEUEING</li>
-								<li>HELP THE COMMUNITY ACHIEVE ACCURATE COMPETENCE RATINGS</li>
-							</ol>
-						</Typography>
+						<ol className={classes.orderedList}>
+							<li className={classes.listItem}>
+								KEEP TRACK OF YOUR PROGRESS (GAMES, WINS, LOSS, RATING)
+							</li>
+							<li className={classes.listItem}>ABILITY TO RECONNECT TO GAMES</li>
+							<li className={classes.listItem}>PRIORITY QUEUEING</li>
+							<li className={classes.listItem}>HELP THE COMMUNITY ACHIEVE ACCURATE COMPETENCE RATINGS</li>
+						</ol>
 					</Grid>
 					<Grid item>
 						<Button
