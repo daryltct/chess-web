@@ -5,18 +5,7 @@ import { UserContext } from '../context/user/UserContext'
 import useMainStyles from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
-import {
-	Grid,
-	Typography,
-	Button,
-	TextField,
-	Modal,
-	Fade,
-	Backdrop,
-	List,
-	ListItem,
-	ListItemText
-} from '@material-ui/core'
+import { Grid, Typography, Button, TextField, Modal, Fade, Backdrop } from '@material-ui/core'
 
 function getModalStyle() {
 	const top = 15
@@ -28,28 +17,6 @@ function getModalStyle() {
 }
 
 const useStyles = makeStyles((theme) => ({
-	subContainer: {
-		width: 'inherit',
-		maxWidth: '400px'
-	},
-	tipContainer: {
-		width: 'inherit',
-		maxWidth: '400px',
-		marginTop: '20px',
-		padding: '20px 40px !important',
-		border: `2px solid ${theme.palette.common.crayola}`,
-		borderRadius: '25px'
-	},
-	loginButton: {
-		...theme.typography.buttons,
-		height: '60px',
-		marginTop: '10px',
-		width: '100%',
-		[theme.breakpoints.down('xs')]: {
-			height: '50px',
-			fontSize: '1.2rem'
-		}
-	},
 	orLabel: {
 		marginTop: '10px'
 	},
@@ -175,7 +142,7 @@ const Login = () => {
 			<Typography variant="h4" align="center" gutterBottom color="primary">
 				LOGIN
 			</Typography>
-			<Grid item className={classes.subContainer}>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<TextField
 					name="email"
 					type="email"
@@ -186,7 +153,7 @@ const Login = () => {
 					fullWidth
 				/>
 			</Grid>
-			<Grid item className={classes.subContainer}>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<TextField
 					name="password"
 					type="password"
@@ -197,8 +164,13 @@ const Login = () => {
 					fullWidth
 				/>
 			</Grid>
-			<Grid item className={classes.subContainer}>
-				<Button className={classes.loginButton} variant="contained" color="primary" onClick={handleSubmit}>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<Button
+					className={mainClasses.loginAndRegisterButton}
+					variant="contained"
+					color="primary"
+					onClick={handleSubmit}
+				>
 					Login
 				</Button>
 
@@ -207,7 +179,7 @@ const Login = () => {
 				</Typography>
 
 				<Button
-					className={classes.loginButton}
+					className={mainClasses.loginAndRegisterButton}
 					variant="contained"
 					color="secondary"
 					onClick={() => setOpen(true)}
@@ -216,14 +188,14 @@ const Login = () => {
 				</Button>
 			</Grid>
 
-			<Grid item className={classes.subContainer}>
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<hr />
 				<Typography variant="h5" align="center" className={classes.newLabel}>
 					NEW USER?
 				</Typography>
 
 				<Button
-					className={classes.loginButton}
+					className={mainClasses.loginAndRegisterButton}
 					variant="contained"
 					color="primary"
 					component={Link}
