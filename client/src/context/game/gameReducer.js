@@ -47,6 +47,7 @@ export default (state, action) => {
 				fen: 'start',
 				pgn: null,
 				opponent: {
+					...state.opponent,
 					id: state.opponent.id,
 					rematch: false
 				}
@@ -56,6 +57,7 @@ export default (state, action) => {
 				...state,
 				rematch: true,
 				opponent: {
+					...state.opponent,
 					id: state.opponent.id,
 					rematch: false
 				}
