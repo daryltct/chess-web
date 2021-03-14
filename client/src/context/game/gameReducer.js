@@ -36,7 +36,7 @@ export default (state, action) => {
 		case 'RECEIVE_REMATCH':
 			return {
 				...state,
-				opponent: { ...action.payload }
+				opponent: { ...state.opponent, ...action.payload }
 			}
 		case 'INIT_REMATCH':
 			return {
