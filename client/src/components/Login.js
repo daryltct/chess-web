@@ -5,7 +5,18 @@ import { UserContext } from '../context/user/UserContext'
 import useMainStyles from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
-import { Grid, Typography, Button, TextField, Modal, Fade, Backdrop } from '@material-ui/core'
+import {
+	Grid,
+	Typography,
+	Button,
+	TextField,
+	Modal,
+	Fade,
+	Backdrop,
+	List,
+	ListItem,
+	ListItemText
+} from '@material-ui/core'
 
 function getModalStyle() {
 	const top = 15
@@ -122,10 +133,14 @@ const Login = () => {
 						</Typography>
 					</Grid>
 					<Grid item>
-						<Typography>1. KEEP TRACK OF YOUR PROGRESS (GAMES, WINS, LOSS, RATING)</Typography>
-						<Typography>2. ABILITY TO RECONNECT TO GAMES</Typography>
-						<Typography>3. PRIORITY QUEUEING</Typography>
-						<Typography>4. HELP THE COMMUNITY ACHIEVE ACCURATE COMPETENCE RATINGS</Typography>
+						<Typography>
+							<ol style={{ margin: '0px 0px 10px 0px', paddingLeft: '20px' }}>
+								<li>KEEP TRACK OF YOUR PROGRESS (GAMES, WINS, LOSS, RATING)</li>
+								<li>ABILITY TO RECONNECT TO GAMES</li>
+								<li>PRIORITY QUEUEING</li>
+								<li>HELP THE COMMUNITY ACHIEVE ACCURATE COMPETENCE RATINGS</li>
+							</ol>
+						</Typography>
 					</Grid>
 					<Grid item>
 						<Button
