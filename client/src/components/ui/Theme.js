@@ -5,6 +5,7 @@ const charcoal = '#2e4756'
 
 const crayola = '#1C3738'
 const mint = '#F4FFF8'
+const powder = '#C2DFE0'
 
 const theme = createMuiTheme({
 	palette: {
@@ -16,7 +17,7 @@ const theme = createMuiTheme({
 			main: `${crayola}`
 		},
 		secondary: {
-			main: `${mint}`
+			main: `${powder}`
 		}
 	},
 	typography: {
@@ -27,7 +28,11 @@ const theme = createMuiTheme({
 			color: '#fff'
 		},
 		buttons: {
-			fontSize: '1.4rem'
+			fontSize: '1.4rem',
+			boxShadow: 'none',
+			'&:hover': {
+				boxShadow: 'none'
+			}
 		}
 	}
 })

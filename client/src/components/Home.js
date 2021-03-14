@@ -26,7 +26,10 @@ const useStyles = makeStyles((theme) => ({
 		textAlign: 'center',
 		color: theme.palette.common.crayola,
 		height: 110,
-		marginBottom: '30px'
+		marginBottom: '30px',
+		[theme.breakpoints.down('xs')]: {
+			height: 150
+		}
 	}
 }))
 
@@ -117,15 +120,17 @@ const Home = () => {
 	)
 
 	return (
-		<Grid
-			container
-			direction="column"
-			alignContent="center"
-			alignItems="center"
-			className={mainClasses.mainContainer}
-		>
-			{gameState.roomId ? <Game /> : findGameInterface}
-		</Grid>
+		user && (
+			<Grid
+				container
+				direction="column"
+				alignContent="center"
+				alignItems="center"
+				className={mainClasses.mainContainer}
+			>
+				{gameState.roomId ? <Game /> : findGameInterface}
+			</Grid>
+		)
 	)
 }
 
