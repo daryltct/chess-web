@@ -86,13 +86,20 @@ io.on('connection', (socket) => {
 		const oppColor = socket.color === 'white' ? 'black' : 'white'
 		try {
 			const room = await Room.findById(data.roomId)
-			if (!room || !room.inProgress) return
+			if (!room) return
 
+			// if game has ended
+			if (!room.inProgress) {
+				socket.to(data.roomId).emit('playerLeave', 'Opponent has left')
+				closeRoom(data.roomId)
+				return
+			}
+
+			// if game is in progress
 			// calculate expected score to update elo rating
 			const myExpectedScore = elo.getExpected(room[socket.color].elo, room[oppColor].elo)
 			const oppExpectedScore = elo.getExpected(room[oppColor].elo, room[socket.color].elo)
 
-			// if game is in progress
 			// if opposing player is: active - player lose, opp win
 			if (room[oppColor].isActive) {
 				updateUserGames(socket.playerId, 'loss', room[socket.color].elo, myExpectedScore)
@@ -106,7 +113,7 @@ io.on('connection', (socket) => {
 			}
 			// close the room
 			closeRoom(data.roomId)
-			socket.to(data.roomId).emit('playerLeave', 'Opponent has disconnected')
+			socket.to(data.roomId).emit('playerLeave', 'Opponent has left')
 		} catch (e) {
 			console.error(e)
 		}
