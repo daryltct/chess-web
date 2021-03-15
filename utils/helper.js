@@ -139,8 +139,8 @@ const disconnectProcess = (socket) => {
 			if (!fetchedRoom) return
 
 			const oppColor = socket.color === 'white' ? 'black' : 'white'
-			// if user is guest or other player is inactive, close room
-			if (socket.isGuest || !fetchedRoom[oppColor].isActive) {
+			// if user is guest or other player is inactive or if game has ended, close room
+			if (socket.isGuest || !fetchedRoom[oppColor].isActive || !fetchedRoom.inProgress) {
 				closeRoom(room)
 				socket.to(room).emit('playerLeave', 'Opponent has left the room')
 			} else {
