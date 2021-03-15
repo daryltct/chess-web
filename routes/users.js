@@ -89,4 +89,21 @@ router.put('/', checkToken, async (req, res) => {
 	}
 })
 
+// GET api/users/
+// get user's rank and top 5 users' profile
+// private access
+router.get('/', checkToken, async (req, res) => {
+	try {
+		const users = await User.find({}, 'name games').sort({ 'games.elo': -1, 'games.total': -1 })
+		const rank = users.findIndex((obj) => obj.id === req.user.id)
+
+		res.json({
+			rank: rank + 1,
+			users: users.slice(0, 5)
+		})
+	} catch (e) {
+		res.status(500).send('Something went wrong')
+	}
+})
+
 module.exports = router
