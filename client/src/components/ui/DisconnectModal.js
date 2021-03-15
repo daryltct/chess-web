@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react'
 
 import { useMainStyles, getModalStyle } from './Styles'
 
+import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, Modal, Fade, Backdrop } from '@material-ui/core'
 
 const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 	const mainClasses = useMainStyles()
+	const theme = useTheme()
+	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
 	const [ timer, setTimer ] = useState(60)
 
@@ -43,10 +46,10 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 						</Typography>
 					</Grid>
 					<Grid item>
-						<Typography variant="h3" align="center">
+						<Typography variant={isXS ? 'h5' : 'h4'} align="center">
 							TIME REMAINING:
 						</Typography>
-						<Typography variant="h3" align="center">
+						<Typography variant={isXS ? 'h5' : 'h4'} align="center">
 							{timer}
 						</Typography>
 					</Grid>
