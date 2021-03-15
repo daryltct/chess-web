@@ -8,6 +8,7 @@ import Home from './components/Home'
 import Login from './components/Login'
 import Register from './components/Register'
 import SinglePlayer from './components/SinglePlayer'
+import Profile from './components/Profile'
 
 const App = () => {
 	return (
@@ -17,7 +18,8 @@ const App = () => {
 				<PrivateRoute exact path="/" component={Home} />
 				<Route exact path="/login" component={Login} />
 				<Route exact path="/register" component={Register} />
-				<Route exact path="/single" component={SinglePlayer} />
+				<PrivateRoute exact path="/single" component={SinglePlayer} />
+				<PrivateRoute exact path="/profile" component={Profile} />
 			</Switch>
 		</Router>
 	)
