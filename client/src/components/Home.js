@@ -57,13 +57,18 @@ const Home = () => {
 
 	useEffect(
 		() => {
+			const reconnectHandler = (data) => {
+				reconnectGame(data)
+				joinQueue()
+			}
+
 			if (socket) {
 				socket.on('gameStart', initRoom)
-				socket.on('reconnect', reconnectGame)
+				socket.on('reconnect', reconnectHandler)
 
 				return () => {
 					socket.off('gameStart', initRoom)
-					//socket.off('reconnect', (reconnectGame))
+					socket.off('reconnect', reconnectGame)
 				}
 			}
 		},
