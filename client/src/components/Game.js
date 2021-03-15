@@ -3,8 +3,9 @@ import Chessboard from 'chessboardjsx'
 
 import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
-import DisconnectModal from './ui/DisconnectModal'
 import { useMainStyles } from './ui/Styles'
+import DisconnectModal from './ui/DisconnectModal'
+import LeaveModal from './ui/LeaveModal'
 
 import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'
@@ -95,6 +96,7 @@ const Game = () => {
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
 
 	const [ openDisconnectModal, setOpenDisconnectModal ] = useState(false)
+	const [ openLeaveModal, setOpenLeaveModal ] = useState(false)
 
 	useEffect(() => {
 		if (!game) {
@@ -128,8 +130,9 @@ const Game = () => {
 			}
 
 			const playerLeaveHandler = (data) => {
-				leaveGame()
-				leaveQueue()
+				setOpenLeaveModal(true)
+				// leaveGame()
+				// leaveQueue()
 			}
 
 			if (socket && game) {
@@ -314,6 +317,7 @@ const Game = () => {
 				</Button>
 			</Grid>
 			<DisconnectModal openDisconnectModal={openDisconnectModal} leaveGameHandler={leaveGameHandler} />
+			<LeaveModal openLeaveModal={openLeaveModal} leaveGame={leaveGame} leaveQueue={leaveQueue} />
 		</Grid>
 	)
 }
