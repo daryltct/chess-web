@@ -108,7 +108,7 @@ const Header = () => {
 				}
 			})
 		},
-		[ active, routes ]
+		[ active, routes, window.location.pathname ]
 	)
 
 	const changeTab = (e, value) => {
