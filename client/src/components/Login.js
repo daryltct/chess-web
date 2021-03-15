@@ -2,45 +2,14 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
 import { UserContext } from '../context/user/UserContext'
-import useMainStyles from './ui/Styles'
+import { useMainStyles, getModalStyle } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
 import { Grid, Typography, Button, TextField, Modal, Fade, Backdrop } from '@material-ui/core'
 
-function getModalStyle() {
-	const top = 15
-
-	return {
-		top: `${top}%`,
-		margin: 'auto'
-	}
-}
-
 const useStyles = makeStyles((theme) => ({
 	orLabel: {
 		marginTop: '10px'
-	},
-	paper: {
-		position: 'absolute',
-		width: 400,
-		backgroundColor: theme.palette.background.paper,
-		border: '2px solid #000',
-		boxShadow: theme.shadows[5],
-		padding: theme.spacing(2, 4, 3),
-		outline: 'none',
-		border: 'none',
-		[theme.breakpoints.down('xs')]: {
-			width: 280
-		}
-	},
-	modalButton: {
-		...theme.typography.buttons,
-		height: '50px',
-		fontSize: '1.2rem',
-		[theme.breakpoints.down('xs')]: {
-			height: '40px',
-			fontSize: '1.1rem'
-		}
 	},
 	orderedList: {
 		margin: '0px 0px 10px 0px',
@@ -91,7 +60,7 @@ const Login = () => {
 
 	const callToAction = (
 		<Fade in={open}>
-			<div className={classes.paper} style={getModalStyle()}>
+			<div className={mainClasses.paper} style={getModalStyle()}>
 				<Grid container direction="column" spacing={2}>
 					<Grid item>
 						<Typography variant="h4" align="center">
@@ -118,7 +87,7 @@ const Login = () => {
 						<Button
 							variant="contained"
 							color="primary"
-							className={classes.modalButton}
+							className={mainClasses.modalButton}
 							component={Link}
 							to="/register"
 							fullWidth
@@ -130,7 +99,7 @@ const Login = () => {
 						<Button
 							variant="contained"
 							color="secondary"
-							className={classes.modalButton}
+							className={mainClasses.modalButton}
 							onClick={loginGuest}
 							fullWidth
 						>

@@ -5,7 +5,7 @@ import Typewriter from 'typewriter-effect'
 import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
 import Game from './Game'
-import useMainStyles from './ui/Styles'
+import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
 import { Grid, Typography, Button, CircularProgress, Fade } from '@material-ui/core'

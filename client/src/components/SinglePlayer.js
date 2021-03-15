@@ -3,7 +3,7 @@ import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
 import { UserContext } from '../context/user/UserContext'
-import useMainStyles from './ui/Styles'
+import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'

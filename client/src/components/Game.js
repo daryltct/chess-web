@@ -4,7 +4,7 @@ import Chessboard from 'chessboardjsx'
 import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
 import DisconnectModal from './ui/DisconnectModal'
-import useMainStyles from './ui/Styles'
+import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'

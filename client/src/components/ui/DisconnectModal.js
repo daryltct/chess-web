@@ -1,44 +1,11 @@
 import React, { useState, useEffect } from 'react'
 
-import { makeStyles } from '@material-ui/styles'
+import { useMainStyles, getModalStyle } from './Styles'
+
 import { useMediaQuery, Grid, Typography, Button, Modal, Fade, Backdrop } from '@material-ui/core'
 
-function getModalStyle() {
-	const top = 15
-
-	return {
-		top: `${top}%`,
-		margin: 'auto'
-	}
-}
-
-const useStyles = makeStyles((theme) => ({
-	paper: {
-		position: 'absolute',
-		width: 400,
-		backgroundColor: theme.palette.background.paper,
-		border: '2px solid #000',
-		boxShadow: theme.shadows[5],
-		padding: theme.spacing(2, 4, 3),
-		outline: 'none',
-		border: 'none',
-		[theme.breakpoints.down('xs')]: {
-			width: 280
-		}
-	},
-	modalButton: {
-		...theme.typography.buttons,
-		height: '50px',
-		fontSize: '1.2rem',
-		[theme.breakpoints.down('xs')]: {
-			height: '40px',
-			fontSize: '1.1rem'
-		}
-	}
-}))
-
 const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
-	const classes = useStyles()
+	const mainClasses = useMainStyles()
 
 	const [ timer, setTimer ] = useState(60)
 
@@ -62,7 +29,7 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 
 	const popup = (
 		<Fade in={openDisconnectModal}>
-			<div className={classes.paper} style={getModalStyle()}>
+			<div className={mainClasses.paper} style={getModalStyle()}>
 				<Grid container direction="column" spacing={2}>
 					<Grid item>
 						<Typography variant="h4" align="center">
@@ -87,7 +54,7 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 						<Button
 							variant="contained"
 							color="primary"
-							className={classes.modalButton}
+							className={mainClasses.modalButton}
 							fullWidth
 							disabled={timer !== 0}
 							onClick={() => leaveGameHandler(false)}
@@ -99,7 +66,7 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 						<Button
 							variant="contained"
 							color="secondary"
-							className={classes.modalButton}
+							className={mainClasses.modalButton}
 							onClick={() => leaveGameHandler(true)}
 							fullWidth
 						>

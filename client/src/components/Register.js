@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
 import { UserContext } from '../context/user/UserContext'
-import useMainStyles from './ui/Styles'
+import { useMainStyles } from './ui/Styles'
 
 import { Grid, Typography, Button, TextField } from '@material-ui/core'
 
