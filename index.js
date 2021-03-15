@@ -93,13 +93,16 @@ io.on('connection', (socket) => {
 			const oppExpectedScore = elo.getExpected(room[oppColor].elo, room[socket.color].elo)
 
 			// if game is in progress
-			// if opposing player is: active - player lose, opp win | inactive - player win, opp lose
+			// if opposing player is: active - player lose, opp win
 			if (room[oppColor].isActive) {
 				updateUserGames(socket.playerId, 'loss', room[socket.color].elo, myExpectedScore)
 				updateUserGames(room[oppColor].playerId, 'win', room[oppColor].elo, oppExpectedScore)
 			} else {
-				updateUserGames(socket.playerId, 'win', room[socket.color].elo, myExpectedScore)
-				updateUserGames(room[oppColor].playerId, 'loss', room[oppColor].elo, oppExpectedScore)
+				// if opposing player is inactive and void room is false - player win, opp lose
+				if (!data.voidRoom) {
+					updateUserGames(socket.playerId, 'win', room[socket.color].elo, myExpectedScore)
+					updateUserGames(room[oppColor].playerId, 'loss', room[oppColor].elo, oppExpectedScore)
+				}
 			}
 			// close the room
 			closeRoom(data.roomId)
