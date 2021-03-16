@@ -15,6 +15,7 @@ router.post(
 	'/',
 	[
 		check('name', 'Please enter a name').not().isEmpty(),
+		check('name', 'Name can only contain alphabets and numbers').isAlphanumeric(),
 		check('email', 'Please enter a valid email address').isEmail(),
 		check('password', 'Please enter a password').not().isEmpty()
 	],
