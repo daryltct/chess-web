@@ -7,6 +7,7 @@ import { AlertContext } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
 import DisconnectModal from './ui/DisconnectModal'
 import LeaveModal from './ui/LeaveModal'
+import convertMoveToMessage from '../utils/convertMoveToMessage'
 
 import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'
@@ -117,7 +118,7 @@ const Game = () => {
 		pauseGame,
 		resumeGame
 	} = useContext(GameContext)
-	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent } = gameState
+	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent, history } = gameState
 
 	const [ openDisconnectModal, setOpenDisconnectModal ] = useState(false)
 	const [ openLeaveModal, setOpenLeaveModal ] = useState(false)
@@ -147,6 +148,7 @@ const Game = () => {
 			const gameEndHandler = (data) => {
 				const { move, winner, reason } = data
 				game.move(move)
+				makeMove()
 				gameEnd({ winner, reason })
 			}
 
@@ -203,6 +205,17 @@ const Game = () => {
 			}
 		},
 		[ gameState, opponent ]
+	)
+
+	// provide updates on move in chat
+	useEffect(
+		() => {
+			if (history.length) {
+				const latestMove = history[history.length - 1]
+				setChat((prevState) => [ ...prevState, { from: 'MOVE-UPDATE', msg: convertMoveToMessage(latestMove) } ])
+			}
+		},
+		[ history ]
 	)
 
 	const onDrop = ({ sourceSquare, targetSquare }) => {
