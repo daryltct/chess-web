@@ -19,7 +19,6 @@ const attemptReconnect = async (socket) => {
 		// check player color and attach to socket
 		const myColor = room.white.playerId === socket.playerId ? 'white' : 'black'
 		socket.color = myColor
-		console.log(room.id)
 		socket.join(room.id)
 
 		// update room state that user is active

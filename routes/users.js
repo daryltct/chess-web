@@ -65,7 +65,7 @@ router.post(
 				}
 			)
 		} catch (e) {
-			console.log(e)
+			console.error(e)
 			res.status(500).json({ msg: 'Server Error' })
 		}
 	}
@@ -103,6 +103,7 @@ router.get('/', checkToken, async (req, res) => {
 			users: users.slice(0, 5)
 		})
 	} catch (e) {
+		console.error(e)
 		res.status(500).json({ msg: 'Server Error' })
 	}
 })

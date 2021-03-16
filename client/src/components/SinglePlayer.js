@@ -2,6 +2,7 @@ import React, { Fragment, useState, useEffect, useContext } from 'react'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
+import { AlertContext } from '../context/alert/AlertContext'
 import { UserContext } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
@@ -46,6 +47,7 @@ const SinglePlayer = () => {
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
+	const { setAlert } = useContext(AlertContext)
 	const { userState: { socket } } = useContext(UserContext)
 
 	const [ gameState, setGameState ] = useState(initialState)
@@ -99,7 +101,9 @@ const SinglePlayer = () => {
 				setTimeout(invokeAI, 500)
 			}
 		} catch (e) {
-			console.log(e)
+			if (sourceSquare !== targetSquare) {
+				setAlert('INVALID MOVE', 'warning')
+			}
 		}
 	}
 

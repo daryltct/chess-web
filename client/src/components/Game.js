@@ -3,6 +3,7 @@ import Chessboard from 'chessboardjsx'
 
 import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
+import { AlertContext } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
 import DisconnectModal from './ui/DisconnectModal'
 import LeaveModal from './ui/LeaveModal'
@@ -78,6 +79,7 @@ const Game = () => {
 	const isMD = useMediaQuery(theme.breakpoints.down('md'))
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
+	const { setAlert } = useContext(AlertContext)
 	const { userState, leaveQueue } = useContext(UserContext)
 	const { socket } = userState
 	const {
@@ -117,14 +119,14 @@ const Game = () => {
 				gameEnd({ winner, reason })
 			}
 
-			const opponentDisconnectHandler = (data) => {
-				console.log('opponent disconnected')
+			const opponentDisconnectHandler = () => {
+				setAlert('OPPONENT DISCONNECTED', 'info')
 				setOpenDisconnectModal(true)
 				pauseGame()
 			}
 
-			const opponentReconnectHandler = (data) => {
-				console.log('opponent reconnected')
+			const opponentReconnectHandler = () => {
+				setAlert('OPPONENT RECONNECTED', 'info')
 				setOpenDisconnectModal(false)
 				resumeGame()
 			}

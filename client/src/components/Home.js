@@ -76,7 +76,6 @@ const Home = () => {
 	)
 
 	const toggleQueue = () => {
-		// console.log(userState.user._id)
 		if (!inQueue) {
 			socket.emit('findGame', true)
 			joinQueue()

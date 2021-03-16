@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
 
 import { UserContext } from '../context/user/UserContext'
+import { AlertContext } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -30,6 +31,7 @@ const Profile = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
+	const { setAlert } = useContext(AlertContext)
 	const { loadUser, userState } = useContext(UserContext)
 	const { user, isGuest, socket } = userState
 
@@ -42,8 +44,8 @@ const Profile = () => {
 				const res = await axios.get('/api/users')
 				setRank(res.data.rank)
 				setTop5(res.data.users)
-			} catch (e) {
-				console.log(e)
+			} catch (err) {
+				setAlert(err.response.data.msg, 'error')
 			}
 		}
 		if (socket) {
