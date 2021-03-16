@@ -9,11 +9,13 @@ import Login from './components/Login'
 import Register from './components/Register'
 import SinglePlayer from './components/SinglePlayer'
 import Profile from './components/Profile'
+import Alert from './components/ui/Alert'
 
 const App = () => {
 	return (
 		<Router>
 			<Header />
+			<Alert />
 			<Switch>
 				<PrivateRoute exact path="/" component={Home} />
 				<Route exact path="/login" component={Login} />

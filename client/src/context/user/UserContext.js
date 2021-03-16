@@ -1,8 +1,9 @@
-import React, { createContext, useReducer, useEffect } from 'react'
+import React, { createContext, useReducer, useEffect, useContext } from 'react'
 import axios from 'axios'
 
 import userReducer from './userReducer'
 import loadAuthToken from '../../utils/loadAuthToken'
+import { AlertContext } from '../alert/AlertContext'
 
 const UserContext = createContext()
 
@@ -17,6 +18,7 @@ export const initialState = {
 }
 
 const UserContextProvider = (props) => {
+	const { setAlert } = useContext(AlertContext)
 	const [ userState, userDispatch ] = useReducer(userReducer, initialState)
 
 	// load token on initial render
@@ -37,7 +39,7 @@ const UserContextProvider = (props) => {
 		try {
 			const res = await axios.get('/api/auth')
 			userDispatch({ type: 'USER_LOADED', payload: res.data })
-		} catch (e) {
+		} catch (err) {
 			userDispatch({ type: 'AUTH_ERROR' })
 		}
 	}
@@ -48,8 +50,9 @@ const UserContextProvider = (props) => {
 			const res = await axios.post('/api/auth', form) // token
 			userDispatch({ type: 'LOGIN_SUCCESS', payload: res.data })
 			loadUser()
-		} catch (e) {
-			userDispatch({ type: 'LOGIN_FAIL', payload: e.response.data.msg })
+		} catch (err) {
+			userDispatch({ type: 'LOGIN_FAIL', payload: err.response.data.msg })
+			setAlert(err.response.data.msg, 'error')
 		}
 	}
 
@@ -59,8 +62,9 @@ const UserContextProvider = (props) => {
 			const res = await axios.post('/api/users', form) // token
 			userDispatch({ type: 'REGISTER_SUCCESS', payload: res.data })
 			loadUser()
-		} catch (e) {
-			userDispatch({ type: 'REGISTER_FAIL', payload: e.response.data.msg })
+		} catch (err) {
+			userDispatch({ type: 'REGISTER_FAIL', payload: err.response.data.msg })
+			setAlert(err.response.data.msg, 'error')
 		}
 	}
 
