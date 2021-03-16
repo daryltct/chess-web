@@ -21,7 +21,8 @@ router.post(
 	async (req, res) => {
 		const err = validationResult(req)
 		if (!err.isEmpty()) {
-			return res.status(400).json({ errors: err.array() })
+			const errArr = err.array()
+			return res.status(400).json({ msg: errArr[0].msg })
 		}
 
 		const { name, email, password } = req.body
@@ -65,7 +66,7 @@ router.post(
 			)
 		} catch (e) {
 			console.log(e)
-			res.status(500).send('Something went wrong')
+			res.status(500).json({ msg: 'Server Error' })
 		}
 	}
 )
@@ -85,7 +86,7 @@ router.put('/', checkToken, async (req, res) => {
 		res.json(user)
 	} catch (e) {
 		console.error(e)
-		res.status(500).send('Something went wrong')
+		res.status(500).json({ msg: 'Server Error' })
 	}
 })
 
@@ -102,7 +103,7 @@ router.get('/', checkToken, async (req, res) => {
 			users: users.slice(0, 5)
 		})
 	} catch (e) {
-		res.status(500).send('Something went wrong')
+		res.status(500).json({ msg: 'Server Error' })
 	}
 })
 
