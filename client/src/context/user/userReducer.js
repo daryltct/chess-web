@@ -74,7 +74,7 @@ export default (state, action) => {
 				token: null,
 				user: {
 					_id: randomId,
-					name: randomId.slice(0, 11)
+					name: `${randomId.slice(0, 9)}${randomId.slice(-2)}`
 				}
 			}
 		default:
