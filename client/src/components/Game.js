@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useRef } from 'react'
 import Chessboard from 'chessboardjsx'
 
 import { UserContext } from '../context/user/UserContext'
@@ -21,6 +21,10 @@ const useStyles = makeStyles((theme) => ({
 		backgroundColor: '#000',
 		height: lgScreenSize,
 		width: lgScreenSize,
+		padding: '2px 5px',
+		display: 'flex',
+		flexDirection: 'column',
+		boxSizing: 'border-box',
 		[theme.breakpoints.down('md')]: {
 			height: mdScreenSize,
 			width: mdScreenSize
@@ -36,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 	chatboxContainer: {
 		display: 'flex',
 		flexDirection: 'row',
+		color: '#fff',
 		[theme.breakpoints.down('sm')]: {
 			justifyContent: 'center'
 		}
@@ -48,9 +53,6 @@ const useStyles = makeStyles((theme) => ({
 		}
 	},
 	subContainer: {
-		textAlign: 'center'
-	},
-	winMsgContainer: {
 		textAlign: 'center'
 	},
 	leaveAndRematchButton: {
@@ -69,6 +71,24 @@ const useStyles = makeStyles((theme) => ({
 			fontSize: '1.2rem',
 			width: '160px'
 		}
+	},
+	inputContainer: {
+		marginTop: 'auto',
+		display: 'inline-flex'
+	},
+	input: {
+		backgroundColor: '#000',
+		color: '#fff',
+		flexGrow: 100,
+		border: 'none',
+		fontFamily: theme.typography.fontFamily,
+		fontSize: '1rem',
+		'&:focus': {
+			outline: 'none'
+		}
+	},
+	messagesContainer: {
+		overflow: 'scroll'
 	}
 }))
 
@@ -78,6 +98,8 @@ const Game = () => {
 	const theme = useTheme()
 	const isMD = useMediaQuery(theme.breakpoints.down('md'))
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
+
+	const messagesEndRef = useRef(null) // chatbox
 
 	const { setAlert } = useContext(AlertContext)
 	const { userState, leaveQueue } = useContext(UserContext)
@@ -99,10 +121,19 @@ const Game = () => {
 
 	const [ openDisconnectModal, setOpenDisconnectModal ] = useState(false)
 	const [ openLeaveModal, setOpenLeaveModal ] = useState(false)
+	const [ chat, setChat ] = useState([])
+	const [ message, setMessage ] = useState('')
 
 	useEffect(() => {
 		if (!game) {
 			initGame()
+		}
+		// scroll to bottom of chat on each message added
+		if (messagesEndRef) {
+			messagesEndRef.current.addEventListener('DOMNodeInserted', (event) => {
+				const { currentTarget: target } = event
+				target.scroll({ top: target.scrollHeight, behavior: 'smooth' })
+			})
 		}
 	}, [])
 
@@ -133,8 +164,10 @@ const Game = () => {
 
 			const playerLeaveHandler = (data) => {
 				setOpenLeaveModal(true)
-				// leaveGame()
-				// leaveQueue()
+			}
+
+			const newMessageHandler = (data) => {
+				setChat((prevState) => [ ...prevState, data ])
 			}
 
 			if (socket && game) {
@@ -144,6 +177,7 @@ const Game = () => {
 				socket.on('playerDisconnect', opponentDisconnectHandler)
 				socket.on('playerReconnect', opponentReconnectHandler)
 				socket.on('playerLeave', playerLeaveHandler)
+				socket.on('message', newMessageHandler)
 
 				return () => {
 					socket.off('move', moveHandler)
@@ -152,6 +186,7 @@ const Game = () => {
 					socket.off('playerDisconnect', opponentDisconnectHandler)
 					socket.off('playerReconnect', opponentReconnectHandler)
 					socket.off('playerLeave', playerLeaveHandler)
+					socket.off('message', newMessageHandler)
 				}
 			}
 		},
@@ -226,6 +261,34 @@ const Game = () => {
 		leaveQueue()
 	}
 
+	const handleChange = (event) => {
+		const { value } = event.target
+		setMessage(value)
+	}
+
+	// send message on 'enter' key
+	const handleKeyDown = (event) => {
+		if (event.key === 'Enter') {
+			socket.emit('message', {
+				roomId,
+				message: {
+					from: userState.user.name,
+					msg: message
+				}
+			})
+			// add to chat
+			setChat((prevState) => [ ...prevState, { from: userState.user.name, msg: message } ])
+			// reset input
+			setMessage('')
+		}
+	}
+
+	const chatbox = (
+		<div className={classes.messagesContainer} ref={messagesEndRef}>
+			{chat.map((message) => <Typography>{`$${message.from}: ${message.msg}`}</Typography>)}
+		</div>
+	)
+
 	return (
 		<Grid
 			container
@@ -255,13 +318,26 @@ const Game = () => {
 				</Grid>
 				{/* Chatbox */}
 				<Grid item sm={12} md={6} className={classes.chatboxContainer}>
-					<div className={classes.chatbox} />
+					<div className={classes.chatbox}>
+						{chatbox}
+						<div className={classes.inputContainer}>
+							<Typography>{`$${userState.user.name}:`}</Typography>
+							<input
+								type="text"
+								value={message}
+								autoFocus
+								className={classes.input}
+								onKeyDown={handleKeyDown}
+								onChange={handleChange}
+							/>
+						</div>
+					</div>
 				</Grid>
 			</Grid>
 
 			{/* Winning message when game ends */}
 			{winner && (
-				<Grid item className={classes.winMsgContainer}>
+				<Grid item className={classes.subContainer}>
 					<Typography variant="h4" align="center" gutterBottom>
 						{reason === 'draw' ? "IT'S A DRAW" : `${winner} won by ${reason}`.toUpperCase()}
 					</Typography>

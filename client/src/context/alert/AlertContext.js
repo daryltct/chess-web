@@ -12,7 +12,7 @@ const AlertContextProvider = (props) => {
 
 	const setAlert = (msg, type) => {
 		const id = uniqid()
-		dispatch({ type: 'SET_ALERT', payload: { id, msg, type } })
+		dispatch({ type: 'SET_ALERT', payload: { id, msg: msg ? msg : 'Server Error', type } })
 
 		setTimeout(() => dispatch({ type: 'REMOVE_ALERT', payload: id }), 3000)
 	}

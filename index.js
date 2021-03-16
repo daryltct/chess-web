@@ -119,6 +119,10 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	socket.on('message', (data) => {
+		socket.to(data.roomId).emit('message', data.message)
+	})
+
 	socket.on('disconnecting', () => {
 		disconnectProcess(socket)
 	})
