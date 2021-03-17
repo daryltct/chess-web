@@ -299,7 +299,7 @@ const Game = () => {
 
 	const chatbox = (
 		<div className={classes.messagesContainer} ref={messagesEndRef}>
-			{chat.map((message) => <Typography>{`$${message.from}: ${message.msg}`}</Typography>)}
+			{chat.map((message, index) => <Typography key={index}>{`$${message.from}: ${message.msg}`}</Typography>)}
 		</div>
 	)
 

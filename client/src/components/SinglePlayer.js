@@ -8,7 +8,7 @@ import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'
-import { useMediaQuery, Grid, Typography, Button, LinearProgress, Divider } from '@material-ui/core'
+import { useMediaQuery, Grid, Typography, Button, LinearProgress } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
 	levelButtons: {

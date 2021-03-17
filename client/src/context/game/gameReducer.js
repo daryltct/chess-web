@@ -1,6 +1,6 @@
 import { initialState } from './GameContext'
 
-export default (state, action) => {
+const gameReducer = (state, action) => {
 	switch (action.type) {
 		case 'INIT_ROOM':
 			const { roomId, color, opponent } = action.payload
@@ -90,3 +90,5 @@ export default (state, action) => {
 			return state
 	}
 }
+
+export default gameReducer
