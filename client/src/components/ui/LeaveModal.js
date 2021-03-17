@@ -5,7 +5,7 @@ import { useMainStyles, getModalStyle } from './Styles'
 import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, Modal, Fade, Backdrop } from '@material-ui/core'
 
-const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue }) => {
+const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
 	const mainClasses = useMainStyles()
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
@@ -21,6 +21,7 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue }) => {
 				if (timer === 0) {
 					leaveGame()
 					leaveQueue()
+					leaveHost()
 				} else {
 					id = openLeaveModal && timer > 0 && setTimeout(() => setTimer(timer - 1), 1000)
 				}
@@ -64,6 +65,7 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue }) => {
 							onClick={() => {
 								leaveGame()
 								leaveQueue()
+								leaveHost()
 							}}
 						>
 							Return to lobby now

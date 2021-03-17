@@ -13,6 +13,7 @@ export const initialState = {
 	isGuest: false,
 	socket: null,
 	inQueue: false,
+	isHost: false,
 	user: null,
 	token: null
 }
@@ -83,6 +84,16 @@ const UserContextProvider = (props) => {
 		userDispatch({ type: 'LEAVE_QUEUE' })
 	}
 
+	// HOST GAME
+	const hostGame = (roomId) => {
+		userDispatch({ type: 'HOST_GAME', payload: roomId })
+	}
+
+	// LEAVE HOST
+	const leaveHost = () => {
+		userDispatch({ type: 'LEAVE_HOST' })
+	}
+
 	// GUEST LOGIN
 	const loginGuest = () => {
 		userDispatch({ type: 'LOGIN_GUEST' })
@@ -94,7 +105,18 @@ const UserContextProvider = (props) => {
 
 	return (
 		<UserContext.Provider
-			value={{ userState, loadUser, login, register, initSocket, joinQueue, leaveQueue, loginGuest }}
+			value={{
+				userState,
+				loadUser,
+				login,
+				register,
+				initSocket,
+				joinQueue,
+				leaveQueue,
+				hostGame,
+				leaveHost,
+				loginGuest
+			}}
 		>
 			{props.children}
 		</UserContext.Provider>

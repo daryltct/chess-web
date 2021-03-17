@@ -1,6 +1,7 @@
-import React, { Fragment, useEffect, useContext } from 'react'
+import React, { Fragment, useEffect, useContext, useState } from 'react'
 import io from 'socket.io-client'
 import Typewriter from 'typewriter-effect'
+import uniqid from 'uniqid'
 
 import { UserContext } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
@@ -8,7 +9,7 @@ import Game from './Game'
 import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
-import { Grid, Typography, Button, CircularProgress, Fade } from '@material-ui/core'
+import { Grid, Typography, Button, CircularProgress, Fade, TextField } from '@material-ui/core'
 
 const PORT = '/'
 
@@ -30,6 +31,19 @@ const useStyles = makeStyles((theme) => ({
 		[theme.breakpoints.down('xs')]: {
 			height: 150
 		}
+	},
+	subContainer: {
+		textAlign: 'center',
+		marginBottom: '60px'
+	},
+	joinContainer: {
+		marginTop: '20px',
+		display: 'flex',
+		justifyContent: 'center'
+	},
+	joinButton: {
+		...theme.typography.buttons,
+		marginLeft: '20px'
 	}
 }))
 
@@ -37,10 +51,12 @@ const Home = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	const { userState, initSocket, joinQueue, leaveQueue } = useContext(UserContext)
+	const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
 	const { gameState, initRoom, reconnectGame } = useContext(GameContext)
 
-	const { socket, inQueue, user } = userState
+	const { socket, inQueue, isHost, user } = userState
+
+	const [ roomInput, setRoomInput ] = useState('')
 
 	useEffect(
 		() => {
@@ -85,6 +101,29 @@ const Home = () => {
 		}
 	}
 
+	const toggleHost = () => {
+		if (!isHost) {
+			const roomId = uniqid()
+			socket.emit('hostRoom', { roomId, signal: true })
+			hostGame(roomId)
+		} else {
+			socket.emit('hostRoom', { roomId: isHost, signal: false })
+			leaveHost()
+		}
+	}
+
+	const joinHost = () => {
+		if (roomInput) {
+			socket.emit('joinHost', roomInput)
+			setRoomInput('')
+		}
+	}
+
+	const handleChange = (event) => {
+		const { value } = event.target
+		setRoomInput(value)
+	}
+
 	const typewriterEffect = (typewriter) => {
 		typewriter
 			.typeString(`HELLO, ${user.name.toUpperCase()}!`)
@@ -101,26 +140,85 @@ const Home = () => {
 	}
 
 	const findGameInterface = (
-		<Grid item>
-			<Grid container direction="column" alignContent="center" alignItems="center">
-				<div className={classes.typewriter}>
-					<Typewriter onInit={typewriterEffect} />
-				</div>
-				<div>
-					<Typography variant="h4" align="center" gutterBottom color="primary">
-						SEARCH FOR AN OPPONENT ONLINE
-					</Typography>
-				</div>
+		<Fragment>
+			<Grid item className={classes.typewriter}>
+				<Typewriter onInit={typewriterEffect} />
+			</Grid>
+			{/* Find random opponent */}
+			<Grid item className={classes.subContainer}>
+				<Typography variant="h4" align="center" gutterBottom color="primary">
+					SEARCH FOR AN OPPONENT ONLINE
+				</Typography>
 				<div className={classes.placeholder}>
 					<Fade in={inQueue} style={{ transitionDelay: inQueue ? '800ms' : '0ms' }} unmountOnExit>
 						<CircularProgress />
 					</Fade>
 				</div>
-				<Button className={classes.queueButton} variant="contained" color="primary" onClick={toggleQueue}>
+				<Button
+					className={classes.queueButton}
+					variant="contained"
+					color="primary"
+					onClick={toggleQueue}
+					disabled={isHost ? true : false}
+				>
 					{inQueue ? 'Cancel Search' : 'Find Game'}
 				</Button>
 			</Grid>
-		</Grid>
+			{/* Host or join private game */}
+			<Grid item className={classes.subContainer}>
+				<Typography variant="h4" align="center" gutterBottom color="primary">
+					HOST OR JOIN A PRIVATE GAME
+				</Typography>
+				<div className={classes.placeholder}>
+					<Fade
+						in={isHost ? true : false}
+						style={{ transitionDelay: isHost ? '800ms' : '0ms' }}
+						unmountOnExit
+					>
+						<CircularProgress />
+					</Fade>
+				</div>
+				<Button
+					className={classes.queueButton}
+					variant="contained"
+					color="primary"
+					onClick={toggleHost}
+					disabled={inQueue}
+				>
+					{isHost ? 'Close Room' : 'Host Game'}
+				</Button>
+				<div className={classes.joinContainer}>
+					{isHost ? (
+						<Typography
+							variant="h6"
+							align="center"
+							color="primary"
+						>{`SEND YOUR FRIEND YOUR ROOM CODE: ${isHost}`}</Typography>
+					) : (
+						!inQueue && (
+							<Fragment>
+								<TextField
+									name="roomId"
+									type="text"
+									value={roomInput}
+									label="ROOM CODE"
+									onChange={handleChange}
+									variant="outlined"
+								/>
+								<Button
+									className={classes.joinButton}
+									variant="contained"
+									color="primary"
+									onClick={joinHost}
+								>
+									Join Game
+								</Button>
+							</Fragment>
+						)
+					)}
+				</div>
+			</Grid>
+		</Fragment>
 	)
 
 	return (

@@ -37,9 +37,9 @@ const attemptReconnect = async (socket) => {
 	}
 }
 
-const startGame = async (playerQueue) => {
-	const player1 = playerQueue.shift()
-	const player2 = playerQueue.shift()
+const startGame = async (playerQueue, privatePlayer1 = null, privatePlayer2 = null) => {
+	const player1 = privatePlayer1 ? privatePlayer1 : playerQueue.shift()
+	const player2 = privatePlayer2 ? privatePlayer2 : playerQueue.shift()
 
 	// prevent same account from playing with each other
 	if (player1.playerId === player2.playerId) {

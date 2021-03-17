@@ -26,7 +26,9 @@ app.use('/api/users', require('./routes/users'))
 app.use('/api/auth', require('./routes/auth'))
 
 // player queue
-let playerQueue = []
+const playerQueue = []
+// private games
+const hostedRooms = []
 
 io.on('connection', (socket) => {
 	console.log(`Socket ${socket.id} has connected`)
@@ -121,6 +123,32 @@ io.on('connection', (socket) => {
 
 	socket.on('message', (data) => {
 		socket.to(data.roomId).emit('message', data.message)
+	})
+
+	socket.on('hostRoom', (data) => {
+		const { roomId, signal } = data
+		if (signal) {
+			hostedRooms.push({
+				roomId,
+				player: socket
+			})
+		} else {
+			// remove room from hosted rooms
+			const roomIndex = playerQueue.findIndex((r) => r.roomId === roomId)
+			if (roomIndex !== -1) hostedRooms.splice(roomIndex, 1)
+		}
+	})
+
+	socket.on('joinHost', (roomId) => {
+		const roomIndex = hostedRooms.findIndex((r) => r.roomId === roomId)
+		if (roomIndex === -1) {
+			socket.emit('error', 'Room does not exist')
+		} else {
+			const roomObj = hostedRooms[roomIndex]
+			startGame(playerQueue, roomObj.player, socket)
+			// remove room from hosted rooms
+			hostedRooms.splice(roomIndex, 1)
+		}
 	})
 
 	socket.on('disconnecting', () => {

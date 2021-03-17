@@ -59,6 +59,16 @@ export default (state, action) => {
 				...state,
 				inQueue: false
 			}
+		case 'HOST_GAME':
+			return {
+				...state,
+				isHost: action.payload
+			}
+		case 'LEAVE_HOST':
+			return {
+				...state,
+				isHost: false
+			}
 		case 'INIT_SOCKET':
 			return {
 				...state,

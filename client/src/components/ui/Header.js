@@ -88,7 +88,7 @@ const Header = () => {
 	const theme = useTheme()
 	const isSmall = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const { userState: { isLoggedIn, inQueue } } = useContext(UserContext)
+	const { userState: { isLoggedIn, inQueue, isHost } } = useContext(UserContext)
 
 	const [ active, setActive ] = useState(0)
 	const [ openDrawer, setOpenDrawer ] = useState(false)
@@ -125,7 +125,7 @@ const Header = () => {
 						label={route.name}
 						component={Link}
 						to={route.link}
-						disabled={inQueue}
+						disabled={inQueue || isHost ? true : false}
 					/>
 				))}
 			</Tabs>

@@ -103,7 +103,7 @@ const Game = () => {
 	const messagesEndRef = useRef(null) // chatbox
 
 	const { setAlert } = useContext(AlertContext)
-	const { userState, leaveQueue } = useContext(UserContext)
+	const { userState, leaveQueue, leaveHost } = useContext(UserContext)
 	const { socket } = userState
 	const {
 		gameState,
@@ -272,6 +272,7 @@ const Game = () => {
 		socket.emit('playerLeave', { roomId, voidRoom })
 		leaveGame()
 		leaveQueue()
+		leaveHost()
 	}
 
 	const handleChange = (event) => {
@@ -408,7 +409,12 @@ const Game = () => {
 				</Button>
 			</Grid>
 			<DisconnectModal openDisconnectModal={openDisconnectModal} leaveGameHandler={leaveGameHandler} />
-			<LeaveModal openLeaveModal={openLeaveModal} leaveGame={leaveGame} leaveQueue={leaveQueue} />
+			<LeaveModal
+				openLeaveModal={openLeaveModal}
+				leaveGame={leaveGame}
+				leaveQueue={leaveQueue}
+				leaveHost={leaveHost}
+			/>
 		</Grid>
 	)
 }
