@@ -10,6 +10,7 @@ import Register from './components/Register'
 import SinglePlayer from './components/SinglePlayer'
 import Profile from './components/Profile'
 import Alert from './components/ui/Alert'
+import Error from './components/Error'
 
 const App = () => {
 	return (
@@ -22,6 +23,7 @@ const App = () => {
 				<Route exact path="/register" component={Register} />
 				<PrivateRoute exact path="/single" component={SinglePlayer} />
 				<PrivateRoute exact path="/profile" component={Profile} />
+				<Route path="*" component={Error} />
 			</Switch>
 		</Router>
 	)

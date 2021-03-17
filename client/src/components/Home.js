@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 		marginTop: '25px'
 	},
 	typewriter: {
-		fontFamily: 'VT323, Courier New, monospace',
+		fontFamily: theme.typography.fontFamily,
 		fontSize: '2.4rem',
 		textAlign: 'center',
 		color: theme.palette.common.crayola,
