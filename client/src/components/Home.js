@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	queueButton: {
 		...theme.typography.buttons,
-		marginTop: '25px'
+		marginBottom: '25px'
 	},
 	typewriter: {
 		fontFamily: theme.typography.fontFamily,
@@ -157,11 +157,6 @@ const Home = () => {
 				<Typography variant="h4" align="center" gutterBottom color="primary">
 					SEARCH FOR AN OPPONENT ONLINE
 				</Typography>
-				<div className={classes.placeholder}>
-					<Fade in={inQueue} style={{ transitionDelay: inQueue ? '800ms' : '0ms' }} unmountOnExit>
-						<CircularProgress />
-					</Fade>
-				</div>
 				<Button
 					className={classes.queueButton}
 					variant="contained"
@@ -171,21 +166,17 @@ const Home = () => {
 				>
 					{inQueue ? 'Cancel Search' : 'Find Game'}
 				</Button>
+				<div className={classes.placeholder}>
+					<Fade in={inQueue} style={{ transitionDelay: inQueue ? '800ms' : '0ms' }} unmountOnExit>
+						<CircularProgress />
+					</Fade>
+				</div>
 			</Grid>
 			{/* Host or join private game */}
 			<Grid item className={classes.subContainer}>
 				<Typography variant="h4" align="center" gutterBottom color="primary">
 					HOST OR JOIN A PRIVATE GAME
 				</Typography>
-				<div className={classes.placeholder}>
-					<Fade
-						in={isHost ? true : false}
-						style={{ transitionDelay: isHost ? '800ms' : '0ms' }}
-						unmountOnExit
-					>
-						<CircularProgress />
-					</Fade>
-				</div>
 				<Button
 					className={classes.queueButton}
 					variant="contained"
@@ -195,6 +186,16 @@ const Home = () => {
 				>
 					{isHost ? 'Close Room' : 'Host Game'}
 				</Button>
+				<div className={classes.placeholder}>
+					<Fade
+						in={isHost ? true : false}
+						style={{ transitionDelay: isHost ? '800ms' : '0ms' }}
+						unmountOnExit
+					>
+						<CircularProgress />
+					</Fade>
+				</div>
+
 				<div className={classes.joinContainer}>
 					{isHost ? (
 						<Typography
@@ -216,7 +217,7 @@ const Home = () => {
 								<Button
 									className={classes.joinButton}
 									variant="contained"
-									color="primary"
+									color="secondary"
 									onClick={joinHost}
 								>
 									Join Game
