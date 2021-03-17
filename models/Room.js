@@ -46,6 +46,10 @@ const RoomSchema = mongoose.Schema({
 		type: Boolean,
 		default: true
 	},
+	isPrivate: {
+		type: Boolean,
+		default: false
+	},
 	createdAt: {
 		type: Date,
 		expires: 3600, // delete room after 1h (testing)

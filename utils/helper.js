@@ -86,7 +86,8 @@ const startGame = async (playerQueue, privatePlayer1 = null, privatePlayer2 = nu
 				playerName: blackPlayer.playerName,
 				isActive: true,
 				elo: blackPlayerElo
-			}
+			},
+			isPrivate: privatePlayer1 ? true : false
 		})
 		await room.save()
 
@@ -194,6 +195,8 @@ const updateStatsOnGameEnd = async (data) => {
 	try {
 		// update room in database
 		const room = await Room.findByIdAndUpdate(roomId, { $set: { inProgress: false } }, { new: true })
+		// if is a private game, don't update stats
+		if (room.isPrivate) return
 
 		// calculate expected score to update elo rating
 		room.white.expectedScore = elo.getExpected(room.white.elo, room.black.elo)

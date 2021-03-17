@@ -90,8 +90,8 @@ io.on('connection', (socket) => {
 			const room = await Room.findById(data.roomId)
 			if (!room) return
 
-			// if game has ended
-			if (!room.inProgress) {
+			// if game has ended or if it's a private game
+			if (!room.inProgress || room.isPrivate) {
 				socket.to(data.roomId).emit('playerLeave', 'Opponent has left')
 				closeRoom(data.roomId)
 				return
