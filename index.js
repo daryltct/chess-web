@@ -143,8 +143,13 @@ io.on('connection', (socket) => {
 		const roomIndex = hostedRooms.findIndex((r) => r.roomId === roomId)
 		if (roomIndex === -1) {
 			socket.emit('error', 'Room does not exist')
+			return
+		}
+		const roomObj = hostedRooms[roomIndex]
+
+		if (roomObj.player.playerId === socket.playerId) {
+			socket.emit('error', 'Unable to join room hosted by yourself')
 		} else {
-			const roomObj = hostedRooms[roomIndex]
 			startGame(playerQueue, roomObj.player, socket)
 			// remove room from hosted rooms
 			hostedRooms.splice(roomIndex, 1)
