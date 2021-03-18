@@ -10,10 +10,11 @@ const initialState = []
 const AlertContextProvider = (props) => {
 	const [ alertState, dispatch ] = useReducer(alertReducer, initialState)
 
+	// SET ALERT
 	const setAlert = (msg, type) => {
 		const id = uniqid()
 		dispatch({ type: 'SET_ALERT', payload: { id, msg: msg ? msg : 'Server Error', type } })
-
+		// Remove alert after 3 seconds
 		setTimeout(() => dispatch({ type: 'REMOVE_ALERT', payload: id }), 3000)
 	}
 

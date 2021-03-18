@@ -7,6 +7,7 @@ import { useMainStyles, getModalStyle } from './ui/Styles'
 import { makeStyles } from '@material-ui/styles'
 import { Grid, Typography, Button, TextField, Modal, Fade, Backdrop } from '@material-ui/core'
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	orLabel: {
 		marginTop: '10px'
@@ -36,6 +37,7 @@ const Login = () => {
 	})
 	const { email, password } = user
 
+	// If user already logged in, redirect to home page
 	useEffect(
 		() => {
 			if (isLoggedIn) {
@@ -45,6 +47,7 @@ const Login = () => {
 		[ isLoggedIn ]
 	)
 
+	// input fields update
 	const handleChange = (event) => {
 		const { name, value } = event.target
 		setUser((prevState) => ({
@@ -58,10 +61,12 @@ const Login = () => {
 		login(user)
 	}
 
+	// display call to action modal to register if user attempts to login as guest
 	const callToAction = (
 		<Fade in={open}>
 			<div className={mainClasses.paper} style={getModalStyle()}>
 				<Grid container direction="column" spacing={2}>
+					{/* Modal header */}
 					<Grid item>
 						<Typography variant="h4" align="center">
 							CONSIDER REGISTERING!
@@ -73,6 +78,7 @@ const Login = () => {
 							ENJOY THESE PERKS WHEN PLAYING WITH AN ACCOUNT:
 						</Typography>
 					</Grid>
+					{/* Modal body */}
 					<Grid item>
 						<ol className={classes.orderedList}>
 							<li className={classes.listItem}>
@@ -83,6 +89,7 @@ const Login = () => {
 							<li className={classes.listItem}>HELP THE COMMUNITY ACHIEVE ACCURATE COMPETENCE RATINGS</li>
 						</ol>
 					</Grid>
+					{/* Modal buttons */}
 					<Grid item>
 						<Button
 							variant="contained"
@@ -113,9 +120,11 @@ const Login = () => {
 
 	return (
 		<Grid container direction="column" alignContent="center" className={mainClasses.mainContainer} spacing={3}>
+			{/* Page header */}
 			<Typography variant="h4" align="center" gutterBottom color="primary">
 				LOGIN
 			</Typography>
+			{/* Input fields */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<TextField
 					name="email"
@@ -138,6 +147,7 @@ const Login = () => {
 					fullWidth
 				/>
 			</Grid>
+			{/* Login button */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<Button
 					className={mainClasses.loginAndRegisterButton}
@@ -161,13 +171,13 @@ const Login = () => {
 					Continue as Guest
 				</Button>
 			</Grid>
-
+			{/* Footer - link to register page */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<hr />
 				<Typography variant="h5" align="center" className={mainClasses.loginAndRegisterFooterLabel}>
 					NEW USER?
 				</Typography>
-
+				{/* Register button */}
 				<Button
 					className={mainClasses.loginAndRegisterButton}
 					variant="contained"

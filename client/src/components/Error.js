@@ -6,6 +6,7 @@ import { useMainStyles } from './ui/Styles'
 import { makeStyles } from '@material-ui/styles'
 import { Grid, Typography } from '@material-ui/core'
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	typewriter: {
 		fontFamily: theme.typography.fontFamily,

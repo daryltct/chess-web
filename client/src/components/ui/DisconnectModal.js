@@ -10,7 +10,7 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
-	const [ timer, setTimer ] = useState(60)
+	const [ timer, setTimer ] = useState(60) // 60 seconds timer
 
 	useEffect(
 		() => {
@@ -30,21 +30,25 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 		[ timer, openDisconnectModal ]
 	)
 
+	// Modal content
 	const popup = (
 		<Fade in={openDisconnectModal}>
 			<div className={mainClasses.paper} style={getModalStyle()}>
 				<Grid container direction="column" spacing={2}>
+					{/* Modal header */}
 					<Grid item>
 						<Typography variant="h4" align="center">
 							OPPONENT DISCONNECTED
 						</Typography>
 						<hr />
 					</Grid>
+					{/* Modal body */}
 					<Grid item>
 						<Typography paragraph>
 							{'please wait for 60s to give your opponent the opportunity to reconnect to the game. leaving after 60s will be considered as a win for you, the game is voided otherwise.'.toUpperCase()}
 						</Typography>
 					</Grid>
+					{/* Timer */}
 					<Grid item>
 						<Typography variant={isXS ? 'h5' : 'h4'} align="center">
 							TIME REMAINING:
@@ -53,6 +57,7 @@ const DisconnectModal = ({ openDisconnectModal, leaveGameHandler }) => {
 							{timer}
 						</Typography>
 					</Grid>
+					{/* Modal buttons */}
 					<Grid item>
 						<Button
 							variant="contained"

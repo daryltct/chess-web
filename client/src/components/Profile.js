@@ -8,6 +8,7 @@ import { useMainStyles } from './ui/Styles'
 import { makeStyles } from '@material-ui/styles'
 import { Grid, Typography, CircularProgress } from '@material-ui/core'
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	profileContainer: {
 		padding: '20px',
@@ -57,6 +58,7 @@ const Profile = () => {
 		}
 	}, [])
 
+	// Leaderboard display
 	const leaderboard = top5 ? (
 		top5.map((player, index) => (
 			<div key={index} className={classes.playerContainer}>
@@ -73,6 +75,7 @@ const Profile = () => {
 	return (
 		user && (
 			<Grid container direction="column" alignContent="center" className={mainClasses.mainContainer}>
+				{/* Page header */}
 				<Typography variant="h4" align="center" gutterBottom color="primary">
 					PROFILE
 				</Typography>

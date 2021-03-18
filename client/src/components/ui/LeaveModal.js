@@ -10,7 +10,7 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
-	const [ timer, setTimer ] = useState(5)
+	const [ timer, setTimer ] = useState(5) // 5 seconds timer
 
 	useEffect(
 		() => {
@@ -36,26 +36,31 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
 		[ timer, openLeaveModal ]
 	)
 
+	// Modal content
 	const popup = (
 		<Fade in={openLeaveModal}>
 			<div className={mainClasses.paper} style={getModalStyle()}>
 				<Grid container direction="column" spacing={2}>
+					{/* Modal header */}
 					<Grid item>
 						<Typography variant="h4" align="center">
 							OPPONENT LEFT THE GAME
 						</Typography>
 						<hr />
 					</Grid>
+					{/* Modal body */}
 					<Grid item>
 						<Typography paragraph align="center">
 							{'your opponent has left the game. you be redirected back to the lobby in:'.toUpperCase()}
 						</Typography>
 					</Grid>
+					{/* Timer */}
 					<Grid item>
 						<Typography variant={isXS ? 'h5' : 'h4'} align="center">
 							{timer}
 						</Typography>
 					</Grid>
+					{/* Modal buttons */}
 					<Grid item>
 						<Button
 							variant="contained"

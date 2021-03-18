@@ -14,6 +14,7 @@ import { Grid, Typography, Button, CircularProgress, Fade, TextField } from '@ma
 
 const PORT = '/'
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	placeholder: {
 		height: 40
@@ -60,6 +61,7 @@ const Home = () => {
 
 	const [ roomInput, setRoomInput ] = useState('')
 
+	// initialize socket
 	useEffect(
 		() => {
 			if (user) {
@@ -99,6 +101,7 @@ const Home = () => {
 		[ socket ]
 	)
 
+	// toggle queue button (join/leave queue)
 	const toggleQueue = () => {
 		if (!inQueue) {
 			socket.emit('findGame', true)
@@ -109,6 +112,7 @@ const Home = () => {
 		}
 	}
 
+	// toggle host game button (create/close game)
 	const toggleHost = () => {
 		if (!isHost) {
 			const roomId = uniqid()
@@ -120,6 +124,7 @@ const Home = () => {
 		}
 	}
 
+	// join a private game
 	const joinHost = () => {
 		if (roomInput) {
 			socket.emit('joinHost', roomInput)
@@ -127,6 +132,7 @@ const Home = () => {
 		}
 	}
 
+	// room code input update
 	const handleChange = (event) => {
 		const { value } = event.target
 		setRoomInput(value)
@@ -149,6 +155,7 @@ const Home = () => {
 
 	const findGameInterface = (
 		<Fragment>
+			{/* Page header */}
 			<Grid item className={classes.typewriter}>
 				<Typewriter onInit={typewriterEffect} />
 			</Grid>
@@ -197,6 +204,7 @@ const Home = () => {
 				</div>
 
 				<div className={classes.joinContainer}>
+					{/* If user hosted game, display room code & hide join game input/button */}
 					{isHost ? (
 						<Typography
 							variant="h6"

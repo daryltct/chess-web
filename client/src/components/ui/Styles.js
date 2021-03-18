@@ -13,6 +13,7 @@ const useMainStyles = makeStyles((theme) => ({
 	mainContainer: {
 		padding: '20px'
 	},
+	// Login/register page components
 	loginAndRegisterSubContainer: {
 		width: 'inherit',
 		maxWidth: '400px'

@@ -6,10 +6,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { Snackbar } from '@material-ui/core'
 import MuiAlert from '@material-ui/lab/Alert'
 
-const CustomizedAlert = (props) => {
-	return <MuiAlert elevation={6} variant="filled" {...props} />
-}
-
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	root: {
 		width: '100%',
@@ -18,6 +15,10 @@ const useStyles = makeStyles((theme) => ({
 		}
 	}
 }))
+
+const CustomizedAlert = (props) => {
+	return <MuiAlert elevation={6} variant="filled" {...props} />
+}
 
 const Alert = () => {
 	const classes = useStyles()

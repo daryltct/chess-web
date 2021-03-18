@@ -20,6 +20,7 @@ const Register = () => {
 	})
 	const { email, name, password } = user
 
+	// If user already logged in, redirect to home page
 	useEffect(
 		() => {
 			if (isLoggedIn) {
@@ -29,6 +30,7 @@ const Register = () => {
 		[ isLoggedIn ]
 	)
 
+	// input fields update
 	const handleChange = (event) => {
 		const { name, value } = event.target
 		setUser((prevState) => ({
@@ -44,9 +46,11 @@ const Register = () => {
 
 	return (
 		<Grid container direction="column" alignContent="center" className={mainClasses.mainContainer} spacing={3}>
+			{/* Page header */}
 			<Typography variant="h4" align="center" gutterBottom color="primary">
 				REGISTRATION
 			</Typography>
+			{/* Input fields */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<TextField
 					name="email"
@@ -80,6 +84,7 @@ const Register = () => {
 					fullWidth
 				/>
 			</Grid>
+			{/* Register button */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<Button
 					className={mainClasses.loginAndRegisterButton}
@@ -90,12 +95,13 @@ const Register = () => {
 					Register
 				</Button>
 			</Grid>
+			{/* Footer - link to login page */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<hr />
 				<Typography variant="h5" align="center" className={mainClasses.loginAndRegisterFooterLabel}>
 					ALREADY HAVE AN ACCOUNT?
 				</Typography>
-
+				{/* Login button */}
 				<Button
 					className={mainClasses.loginAndRegisterButton}
 					variant="contained"

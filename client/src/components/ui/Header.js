@@ -22,6 +22,7 @@ import { useTheme } from '@material-ui/core/styles'
 import VideogameAssetIcon from '@material-ui/icons/VideogameAsset'
 import MenuIcon from '@material-ui/icons/Menu'
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	headerMargin: {
 		...theme.mixins.toolbar,
@@ -108,13 +109,14 @@ const Header = () => {
 				}
 			})
 		},
-		[ active, routes, window.location.pathname ]
+		[ active ]
 	)
 
 	const changeTab = (e, value) => {
 		setActive(value)
 	}
 
+	// Tabs on navigation bar (large screen)
 	const tabs = (
 		<Fragment>
 			<Tabs className={classes.tabContainer} value={active} onChange={changeTab}>
@@ -132,6 +134,7 @@ const Header = () => {
 		</Fragment>
 	)
 
+	// Slideable drawer (small screen)
 	const drawer = (
 		<Fragment>
 			<SwipeableDrawer
@@ -180,6 +183,7 @@ const Header = () => {
 						<VideogameAssetIcon fontSize="large" className={classes.logoMargin} />
 						<Typography variant={isSmall ? 'h5' : 'h4'}>PLAYING CHESS...</Typography>
 					</Button>
+					{/* hide tabs/drawer if user is not logged in */}
 					{isLoggedIn && (isSmall ? drawer : tabs)}
 				</Toolbar>
 			</AppBar>

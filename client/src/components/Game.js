@@ -17,6 +17,7 @@ const lgScreenSize = 560
 const mdScreenSize = 450
 const xsScreenSize = 320
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	chatbox: {
 		backgroundColor: '#000',
@@ -140,11 +141,13 @@ const Game = () => {
 
 	useEffect(
 		() => {
+			// opponent makes move
 			const moveHandler = (move) => {
 				game.move(move)
 				makeMove()
 			}
 
+			// opponent won game
 			const gameEndHandler = (data) => {
 				const { move, winner, reason } = data
 				game.move(move)
@@ -152,22 +155,26 @@ const Game = () => {
 				gameEnd({ winner, reason })
 			}
 
+			// opponent disconencted
 			const opponentDisconnectHandler = () => {
 				setAlert('OPPONENT DISCONNECTED', 'info')
 				setOpenDisconnectModal(true)
 				pauseGame()
 			}
 
+			// opponent reconnected
 			const opponentReconnectHandler = () => {
 				setAlert('OPPONENT RECONNECTED', 'info')
 				setOpenDisconnectModal(false)
 				resumeGame()
 			}
 
+			// opponent left game
 			const playerLeaveHandler = (data) => {
 				setOpenLeaveModal(true)
 			}
 
+			// opponent sent a message
 			const newMessageHandler = (data) => {
 				setChat((prevState) => [ ...prevState, data ])
 			}
@@ -245,6 +252,7 @@ const Game = () => {
 		}
 	}
 
+	// initiate/accept rematch
 	const initiateRematch = () => {
 		acceptRematch()
 		socket.emit('rematch', {
@@ -256,6 +264,7 @@ const Game = () => {
 		})
 	}
 
+	// decline rematch
 	const declineRematchHandler = () => {
 		declineRematch()
 		socket.emit('rematch', {
@@ -268,6 +277,7 @@ const Game = () => {
 		})
 	}
 
+	// leave game
 	const leaveGameHandler = (voidRoom) => {
 		socket.emit('playerLeave', { roomId, voidRoom })
 		leaveGame()
@@ -275,6 +285,7 @@ const Game = () => {
 		leaveHost()
 	}
 
+	// chat input update
 	const handleChange = (event) => {
 		const { value } = event.target
 		setMessage(value)
@@ -312,6 +323,7 @@ const Game = () => {
 			className={mainClasses.mainContainer}
 			spacing={2}
 		>
+			{/* Page header */}
 			<Typography variant="h4" align="center" gutterBottom color="primary">
 				{`PLAYING AGAINST: ${opponent.name.toUpperCase()}`}
 			</Typography>
@@ -408,7 +420,9 @@ const Game = () => {
 					Leave Game
 				</Button>
 			</Grid>
+			{/* Display modal when opponent disconnected */}
 			<DisconnectModal openDisconnectModal={openDisconnectModal} leaveGameHandler={leaveGameHandler} />
+			{/* Display modal when opponent leaves */}
 			<LeaveModal
 				openLeaveModal={openLeaveModal}
 				leaveGame={leaveGame}

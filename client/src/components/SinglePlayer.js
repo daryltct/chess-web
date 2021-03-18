@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, LinearProgress } from '@material-ui/core'
 
+// INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	levelButtons: {
 		...theme.typography.buttons,
@@ -123,9 +124,11 @@ const SinglePlayer = () => {
 
 	const levelSelectionDisplay = (
 		<Fragment>
+			{/* Page header */}
 			<Typography variant="h4" align="center" gutterBottom color="primary">
 				SELECT DIFFICULTY
 			</Typography>
+			{/* Difficulty selection buttons */}
 			{LEVELS.map((obj, index) => (
 				<Button
 					key={index}
@@ -154,12 +157,15 @@ const SinglePlayer = () => {
 					) : (
 						levelSelectionDisplay
 					))}
+				{/* Display loading bar if computer is processing next move */}
 				{turn === 'black' && <LinearProgress />}
 				{winner && (
 					<Fragment>
+						{/* Wining message display */}
 						<Typography variant={isXS ? 'h5' : 'h4'} align="center" className={classes.endGameMsg}>
 							{winner === 'white' ? 'YOU WON, REMATCH?' : 'YOU LOST, TRY AGAIN?'}
 						</Typography>
+						{/* Rematch button */}
 						<Button
 							className={classes.rematchButton}
 							variant="contained"
