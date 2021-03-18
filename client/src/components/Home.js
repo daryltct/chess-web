@@ -72,7 +72,7 @@ const Home = () => {
 				)
 			}
 		},
-		[ user ]
+		[ user, userDispatch ]
 	)
 
 	useEffect(
@@ -102,7 +102,7 @@ const Home = () => {
 				}
 			}
 		},
-		[ socket ]
+		[ socket, alertDispatch, userDispatch, gameDispatch ]
 	)
 
 	// toggle queue button (join/leave queue)

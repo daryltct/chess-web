@@ -127,18 +127,21 @@ const Game = () => {
 	const [ chat, setChat ] = useState([])
 	const [ message, setMessage ] = useState('')
 
-	useEffect(() => {
-		if (!game) {
-			initGame(gameDispatch, userDispatch)
-		}
-		// scroll to bottom of chat on each message added
-		if (messagesEndRef) {
-			messagesEndRef.current.addEventListener('DOMNodeInserted', (event) => {
-				const { currentTarget: target } = event
-				target.scroll({ top: target.scrollHeight, behavior: 'smooth' })
-			})
-		}
-	}, [])
+	useEffect(
+		() => {
+			if (!game) {
+				initGame(gameDispatch, userDispatch)
+			}
+			// scroll to bottom of chat on each message added
+			if (messagesEndRef) {
+				messagesEndRef.current.addEventListener('DOMNodeInserted', (event) => {
+					const { currentTarget: target } = event
+					target.scroll({ top: target.scrollHeight, behavior: 'smooth' })
+				})
+			}
+		},
+		[ game, userDispatch, gameDispatch ]
+	)
 
 	useEffect(
 		() => {
@@ -205,7 +208,7 @@ const Game = () => {
 				}
 			}
 		},
-		[ socket, game, rematch, gameState ]
+		[ socket, game, rematch, gameState, alertDispatch, gameDispatch ]
 	)
 
 	// if this player and opponent both 'true' in rematch, then restart board
@@ -217,7 +220,7 @@ const Game = () => {
 				}
 			}
 		},
-		[ gameState, opponent ]
+		[ gameState, opponent, rematch, gameDispatch ]
 	)
 
 	// provide updates on move in chat

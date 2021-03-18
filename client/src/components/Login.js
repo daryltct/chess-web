@@ -46,7 +46,7 @@ const Login = () => {
 				history.push('/')
 			}
 		},
-		[ isLoggedIn ]
+		[ isLoggedIn, history ]
 	)
 
 	// input fields update

@@ -39,24 +39,27 @@ const Profile = () => {
 	const [ top5, setTop5 ] = useState(null)
 	const [ rank, setRank ] = useState(null)
 
-	useEffect(() => {
-		const getUsers = async () => {
-			try {
-				const res = await axios.get('/api/users')
-				setRank(res.data.rank)
-				setTop5(res.data.users)
-			} catch (err) {
-				setAlert(alertDispatch, err.response.data.msg, 'error')
+	useEffect(
+		() => {
+			const getUsers = async () => {
+				try {
+					const res = await axios.get('/api/users')
+					setRank(res.data.rank)
+					setTop5(res.data.users)
+				} catch (err) {
+					setAlert(alertDispatch, err.response.data.msg, 'error')
+				}
 			}
-		}
-		if (socket) {
-			socket.close()
-		}
-		if (!isGuest) {
-			loadUser(userDispatch)
-			getUsers()
-		}
-	}, [])
+			if (socket) {
+				socket.close()
+			}
+			if (!isGuest) {
+				loadUser(userDispatch)
+				getUsers()
+			}
+		},
+		[ isGuest, socket, alertDispatch, userDispatch ]
+	)
 
 	// Leaderboard display
 	const leaderboard = top5 ? (

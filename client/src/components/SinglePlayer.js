@@ -55,15 +55,18 @@ const SinglePlayer = () => {
 	const [ gameState, setGameState ] = useState(initialState)
 	const { level, game, fen, turn, isFinished, winner } = gameState
 
-	useEffect(() => {
-		setGameState((prevState) => ({
-			...prevState,
-			game: new Game()
-		}))
-		if (socket) {
-			socket.close()
-		}
-	}, [])
+	useEffect(
+		() => {
+			setGameState((prevState) => ({
+				...prevState,
+				game: new Game()
+			}))
+			if (socket) {
+				socket.close()
+			}
+		},
+		[ socket ]
+	)
 
 	useEffect(
 		() => {

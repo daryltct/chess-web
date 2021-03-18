@@ -38,7 +38,7 @@ const LeaveModal = ({ openLeaveModal }) => {
 				}
 			}
 		},
-		[ timer, openLeaveModal ]
+		[ timer, openLeaveModal, gameDispatch, userDispatch ]
 	)
 
 	// Modal content

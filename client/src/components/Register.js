@@ -29,7 +29,7 @@ const Register = () => {
 				history.push('/')
 			}
 		},
-		[ isLoggedIn ]
+		[ isLoggedIn, history ]
 	)
 
 	// input fields update
