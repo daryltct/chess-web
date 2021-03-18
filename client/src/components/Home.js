@@ -5,7 +5,8 @@ import uniqid from 'uniqid'
 
 // import { UserContext } from '../context/user/UserContext'
 import { useUser, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } from '../context/user/UserContext'
-import { GameContext } from '../context/game/GameContext'
+// import { GameContext } from '../context/game/GameContext'
+import { useGame, initRoom, reconnectGame } from '../context/game/GameContext'
 // import { AlertContext } from '../context/alert/AlertContext'
 import { useAlert, setAlert } from '../context/alert/AlertContext'
 import Game from './Game'
@@ -59,7 +60,8 @@ const Home = () => {
 	const [ , alertDispatch ] = useAlert()
 	// const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
-	const { gameState, initRoom, reconnectGame } = useContext(GameContext)
+	// const { gameState, initRoom, reconnectGame } = useContext(GameContext)
+	const [ gameState, gameDispatch ] = useGame()
 
 	const { socket, inQueue, isHost, user } = userState
 
@@ -82,8 +84,12 @@ const Home = () => {
 
 	useEffect(
 		() => {
+			const gameStartHandler = (data) => {
+				initRoom(gameDispatch, data)
+			}
+
 			const reconnectHandler = (data) => {
-				reconnectGame(data)
+				reconnectGame(gameDispatch, data)
 				joinQueue(userDispatch)
 			}
 
@@ -92,12 +98,12 @@ const Home = () => {
 			}
 
 			if (socket) {
-				socket.on('gameStart', () => initRoom)
+				socket.on('gameStart', gameStartHandler)
 				socket.on('reconnect', reconnectHandler)
 				socket.on('error', errorHandler)
 
 				return () => {
-					socket.off('gameStart', initRoom)
+					socket.off('gameStart', gameStartHandler)
 					socket.off('reconnect', reconnectGame)
 					socket.off('error', errorHandler)
 				}
