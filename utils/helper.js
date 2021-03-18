@@ -1,33 +1,45 @@
-const uniqid = require('uniqid')
+const EloRank = require('elo-rank')
+const elo = new EloRank(32) // k-factor = 32
 
 const User = require('../models/User')
+const Room = require('../models/Room')
 
-const attemptReconnect = (socket, activeRooms) => {
-	// check if player is in any active room
-	const roomIndex = activeRooms.findIndex((room) => {
-		const playerColor = room.white.playerId === socket.playerId ? 'white' : 'black'
-		return room.players.includes(socket.playerId) && !room[playerColor].isActive
-	})
-	if (roomIndex === -1) return // no active room
+const attemptReconnect = async (socket) => {
+	try {
+		// check if user is in any active rooms
+		const room = await Room.findOne({
+			$or: [
+				{ $and: [ { 'white.playerId': socket.playerId }, { 'white.isActive': false } ] },
+				{ $and: [ { 'black.playerId': socket.playerId }, { 'black.isActive': false } ] }
+			]
+		})
 
-	const recRoom = activeRooms[roomIndex]
-	const myColor = recRoom.white.playerId === socket.playerId ? 'white' : 'black' // check color of player
-	socket.color = myColor // attach color to socket
-	socket.join(recRoom.roomId) // re-join room
+		if (!room) return
 
-	socket.emit('reconnect', {
-		roomId: recRoom.roomId,
-		pgn: recRoom.pgn, // to restore game state
-		color: myColor,
-		opponent: { id: myColor === 'white' ? recRoom.black.playerId : recRoom.white.playerId, rematch: false }
-	})
-	socket.to(recRoom.roomId).emit('playerReconnect')
-	activeRooms[roomIndex][myColor].isActive = true // reset isActive to true
+		// check player color and attach to socket
+		const myColor = room.white.playerId === socket.playerId ? 'white' : 'black'
+		socket.color = myColor
+		socket.join(room.id)
+
+		// update room state that user is active
+		await Room.findByIdAndUpdate(room.id, { $set: { [myColor + '.isActive']: true } })
+
+		const oppColor = myColor === 'white' ? 'black' : 'white'
+		socket.emit('reconnect', {
+			roomId: room.id,
+			pgn: room.pgn, // to restore game state
+			color: myColor,
+			opponent: { id: room[oppColor].playerId, name: room[oppColor].playerName, rematch: false }
+		})
+		socket.to(room.id).emit('playerReconnect')
+	} catch (e) {
+		console.error(e)
+	}
 }
 
-const startGame = (playerQueue, activeRooms) => {
-	const player1 = playerQueue.shift()
-	const player2 = playerQueue.shift()
+const startGame = async (playerQueue, privatePlayer1 = null, privatePlayer2 = null) => {
+	const player1 = privatePlayer1 ? privatePlayer1 : playerQueue.shift()
+	const player2 = privatePlayer2 ? privatePlayer2 : playerQueue.shift()
 
 	// prevent same account from playing with each other
 	if (player1.playerId === player2.playerId) {
@@ -36,6 +48,7 @@ const startGame = (playerQueue, activeRooms) => {
 		return
 	}
 
+	// randomly assign colors to players
 	const coinFlip = Math.random() > 0.5
 	const whitePlayer = coinFlip ? player1 : player2
 	const blackPlayer = coinFlip ? player2 : player1
@@ -43,79 +56,131 @@ const startGame = (playerQueue, activeRooms) => {
 	whitePlayer.color = 'white'
 	blackPlayer.color = 'black'
 
-	const roomId = uniqid() // generate random room id
-	whitePlayer.join(roomId)
-	blackPlayer.join(roomId)
+	try {
+		// retrieve both players' elo rating
+		// if one user is guest, match the guest's elo to the user
+		let whitePlayerElo = (blackPlayerElo = 1000)
+		if (whitePlayer.isGuest && !blackPlayer.isGuest) {
+			const blackPlayerDetails = await User.findById(blackPlayer.playerId)
+			whitePlayerElo = blackPlayerElo = blackPlayerDetails.games.elo
+		} else if (!whitePlayer.isGuest && blackPlayer.isGuest) {
+			const whitePlayerDetails = await User.findById(whitePlayer.playerId)
+			whitePlayerElo = blackPlayerElo = whitePlayerDetails.games.elo
+		} else if (!whitePlayer.isGuest && !blackPlayer.isGuest) {
+			const whitePlayerDetails = await User.findById(whitePlayer.playerId)
+			const blackPlayerDetails = await User.findById(blackPlayer.playerId)
+			whitePlayerElo = whitePlayerDetails.games.elo
+			blackPlayerElo = blackPlayerDetails.games.elo
+		}
 
-	// add room to active rooms
-	activeRooms.push({
-		roomId,
-		players: [ whitePlayer.playerId, blackPlayer.playerId ],
-		white: {
-			playerId: whitePlayer.playerId,
-			isActive: true
-		},
-		black: {
-			playerId: blackPlayer.playerId,
-			isActive: true
-		},
-		pgn: '',
-		inProgress: true
-	})
+		// create room and add to database
+		let room = new Room({
+			players: [ whitePlayer.playerId, blackPlayer.playerId ],
+			white: {
+				playerId: whitePlayer.playerId,
+				playerName: whitePlayer.playerName,
+				isActive: true,
+				elo: whitePlayerElo
+			},
+			black: {
+				playerId: blackPlayer.playerId,
+				playerName: blackPlayer.playerName,
+				isActive: true,
+				elo: blackPlayerElo
+			},
+			isPrivate: privatePlayer1 ? true : false
+		})
+		await room.save()
 
-	whitePlayer.emit('gameStart', { color: 'white', roomId: roomId, opponent: { id: blackPlayer.id, rematch: false } })
-	blackPlayer.emit('gameStart', { color: 'black', roomId: roomId, opponent: { id: whitePlayer.id, rematch: false } })
+		// add both players to same socket room
+		whitePlayer.join(room.id)
+		blackPlayer.join(room.id)
+
+		whitePlayer.emit('gameStart', {
+			color: 'white',
+			roomId: room.id,
+			opponent: { id: blackPlayer.playerId, name: blackPlayer.playerName, rematch: false }
+		})
+		blackPlayer.emit('gameStart', {
+			color: 'black',
+			roomId: room.id,
+			opponent: { id: whitePlayer.playerId, name: whitePlayer.playerName, rematch: false }
+		})
+	} catch (e) {
+		console.error(e)
+	}
 }
 
-const swapColor = (roomId, activeRooms) => {
-	const roomIndex = activeRooms.findIndex((room) => room.roomId == roomId)
+const swapColor = async (roomId) => {
+	try {
+		const room = await Room.findById(roomId)
 
-	const temp = activeRooms[roomIndex].white.playerId
-	activeRooms[roomIndex].white.playerId = activeRooms[roomIndex].black.playerId
-	activeRooms[roomIndex].black.playerId = temp
-
-	// set pgn to empty state
-	activeRooms[roomIndex].pgn = ''
+		// swap user's color and reset game state
+		await Room.findByIdAndUpdate(roomId, { $set: { white: room.black, black: room.white, pgn: '' } })
+	} catch (e) {
+		console.error(e)
+	}
 }
 
-const closeRoom = (roomId, roomsArr) => {
-	const idx = roomsArr.findIndex((room) => room.roomId == roomId)
-	roomsArr.splice(idx, 1)
+const closeRoom = async (roomId) => {
+	try {
+		await Room.findByIdAndDelete(roomId)
+	} catch (e) {
+		console.error(e)
+	}
 }
 
-const disconnectProcess = (socket, activeRooms) => {
+const disconnectProcess = (socket) => {
 	// iterate through every room that socket is in
-	socket.rooms.forEach((room) => {
-		// check if room is active
-		const roomIndex = activeRooms.findIndex((r) => r.roomId == room)
-		if (roomIndex !== -1) {
-			// if user is guest or other player is inactive, leave/close room
+	socket.rooms.forEach(async (room) => {
+		if (room == socket.id) return
+
+		try {
+			const fetchedRoom = await Room.findById(room)
+			if (!fetchedRoom) return
+
 			const oppColor = socket.color === 'white' ? 'black' : 'white'
-			if (socket.playerId.substring(0, 5) === 'guest' || !activeRooms[roomIndex][oppColor].isActive) {
-				closeRoom(room, activeRooms)
+			// if user is guest or other player is inactive or if game has ended, close room
+			if (socket.isGuest || !fetchedRoom[oppColor].isActive || !fetchedRoom.inProgress) {
+				closeRoom(room)
 				socket.to(room).emit('playerLeave', 'Opponent has left the room')
 			} else {
-				// if not guest, update active room: set isActive to false
-				activeRooms[roomIndex][socket.color].isActive = false
+				// update room state that user is inactive
+				await Room.findByIdAndUpdate(room, { $set: { [socket.color + '.isActive']: false } })
 				socket.to(room).emit('playerDisconnect', 'Opponent has disconnected')
 			}
+		} catch (e) {
+			console.error(e)
 		}
 	})
 }
 
 // update/increment number of games/wins/loss of user on database depending on scenario
 // scenario can be any of the 3: 'win', 'loss', 'draw'
-const updateUserGames = async (userId, scenario) => {
+const updateUserGames = async (userId, scenario, currentElo, expectedScore) => {
 	if (userId.substring(0, 5) === 'guest') return
 
+	let updatedElo
 	try {
 		switch (scenario) {
 			case 'win':
-				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1, 'games.wins': 1 } })
+				updatedElo = elo.updateRating(expectedScore, 1, currentElo)
+				return await User.findByIdAndUpdate(userId, {
+					$inc: { 'games.total': 1, 'games.wins': 1 },
+					$set: { 'games.elo': updatedElo }
+				})
 			case 'loss':
-				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1, 'games.loss': 1 } })
+				updatedElo = elo.updateRating(expectedScore, 0, currentElo)
+				return await User.findByIdAndUpdate(userId, {
+					$inc: { 'games.total': 1, 'games.loss': 1 },
+					$set: { 'games.elo': updatedElo }
+				})
 			case 'draw':
-				return await User.findByIdAndUpdate(userId, { $inc: { 'games.total': 1 } })
+				updatedElo = elo.updateRating(expectedScore, 0.5, currentElo)
+				return await User.findByIdAndUpdate(userId, {
+					$inc: { 'games.total': 1 },
+					$set: { 'games.elo': updatedElo }
+				})
 			default:
 				return
 		}
@@ -125,22 +190,30 @@ const updateUserGames = async (userId, scenario) => {
 }
 
 // upon game end, determine winner/loser and update stats accordingly
-const updateStatsOnGameEnd = (data, activeRooms) => {
+const updateStatsOnGameEnd = async (data) => {
 	const { roomId, winner, reason } = data
 
-	const roomIndex = activeRooms.findIndex((room) => room.roomId == roomId)
-	if (roomIndex === -1) return
+	try {
+		// update room in database
+		const room = await Room.findByIdAndUpdate(roomId, { $set: { inProgress: false } }, { new: true })
+		// if is a private game, don't update stats
+		if (room.isPrivate) return
 
-	activeRooms[roomIndex].inProgress = false // game ended
+		// calculate expected score to update elo rating
+		room.white.expectedScore = elo.getExpected(room.white.elo, room.black.elo)
+		room.black.expectedScore = elo.getExpected(room.black.elo, room.white.elo)
 
-	const roomObj = activeRooms[roomIndex]
-	if (reason === 'draw') {
-		updateUserGames(roomObj.white.playerId, 'draw')
-		updateUserGames(roomObj.black.playerId, 'draw')
-	} else if (reason === 'checkmate' || reason === 'stalemate') {
-		const loser = winner === 'white' ? 'black' : 'white'
-		updateUserGames(roomObj[winner].playerId, 'win')
-		updateUserGames(roomObj[loser].playerId, 'loss')
+		// update user stats based on winning condition
+		if (reason === 'draw') {
+			updateUserGames(room.white.playerId, 'draw', room.white.elo, room.white.expectedScore)
+			updateUserGames(room.black.playerId, 'draw', room.black.elo, room.black.expectedScore)
+		} else if (reason === 'checkmate' || reason === 'stalemate') {
+			const loser = winner === 'white' ? 'black' : 'white'
+			updateUserGames(room[winner].playerId, 'win', room[winner].elo, room[winner].expectedScore)
+			updateUserGames(room[loser].playerId, 'loss', room[loser].elo, room[loser].expectedScore)
+		}
+	} catch (e) {
+		console.error(e)
 	}
 }
 

@@ -1,6 +1,6 @@
 import { initialState } from './GameContext'
 
-export default (state, action) => {
+const gameReducer = (state, action) => {
 	switch (action.type) {
 		case 'INIT_ROOM':
 			const { roomId, color, opponent } = action.payload
@@ -36,7 +36,7 @@ export default (state, action) => {
 		case 'RECEIVE_REMATCH':
 			return {
 				...state,
-				opponent: { ...action.payload }
+				opponent: { ...state.opponent, ...action.payload }
 			}
 		case 'INIT_REMATCH':
 			return {
@@ -47,6 +47,7 @@ export default (state, action) => {
 				fen: 'start',
 				pgn: null,
 				opponent: {
+					...state.opponent,
 					id: state.opponent.id,
 					rematch: false
 				}
@@ -56,6 +57,7 @@ export default (state, action) => {
 				...state,
 				rematch: true,
 				opponent: {
+					...state.opponent,
 					id: state.opponent.id,
 					rematch: false
 				}
@@ -88,3 +90,5 @@ export default (state, action) => {
 			return state
 	}
 }
+
+export default gameReducer

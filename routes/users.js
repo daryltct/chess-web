@@ -15,13 +15,15 @@ router.post(
 	'/',
 	[
 		check('name', 'Please enter a name').not().isEmpty(),
+		check('name', 'Name can only contain alphabets and numbers').isAlphanumeric(),
 		check('email', 'Please enter a valid email address').isEmail(),
 		check('password', 'Please enter a password').not().isEmpty()
 	],
 	async (req, res) => {
 		const err = validationResult(req)
 		if (!err.isEmpty()) {
-			return res.status(400).json({ errors: err.array() })
+			const errArr = err.array()
+			return res.status(400).json({ msg: errArr[0].msg })
 		}
 
 		const { name, email, password } = req.body
@@ -64,8 +66,8 @@ router.post(
 				}
 			)
 		} catch (e) {
-			console.log(e)
-			res.status(500).send('Something went wrong')
+			console.error(e)
+			res.status(500).json({ msg: 'Server Error' })
 		}
 	}
 )
@@ -85,28 +87,26 @@ router.put('/', checkToken, async (req, res) => {
 		res.json(user)
 	} catch (e) {
 		console.error(e)
-		res.status(500).send('Something went wrong')
+		res.status(500).json({ msg: 'Server Error' })
 	}
 })
 
-// router.put('/', checkToken, async (req, res) => {
-// 	const { name, games } = req.body
+// GET api/users/
+// get user's rank and top 5 users' profile
+// private access
+router.get('/', checkToken, async (req, res) => {
+	try {
+		const users = await User.find({}, 'name games').sort({ 'games.elo': -1, 'games.total': -1 })
+		const rank = users.findIndex((obj) => obj.id === req.user.id)
 
-// 	const updatedUser = {}
-// 	if (name) updatedUser.name = name
-// 	if (games) updatedUser.games = games
-
-// 	try {
-// 		const user = await User.findByIdAndUpdate(
-// 			req.user.id,
-// 			{ $inc: { 'games.total': 1, 'games.wins': 1 } },
-// 			{ new: true }
-// 		).select('-password')
-// 		res.json(user)
-// 	} catch (e) {
-// 		console.error(e)
-// 		res.status(500).send('Something went wrong')
-// 	}
-// })
+		res.json({
+			rank: rank + 1,
+			users: users.slice(0, 5)
+		})
+	} catch (e) {
+		console.error(e)
+		res.status(500).json({ msg: 'Server Error' })
+	}
+})
 
 module.exports = router

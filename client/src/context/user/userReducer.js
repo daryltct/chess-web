@@ -2,7 +2,7 @@ import uniqid from 'uniqid'
 
 import { initialState } from './UserContext'
 
-export default (state, action) => {
+const userReducer = (state, action) => {
 	switch (action.type) {
 		case 'USER_LOADED':
 			return {
@@ -59,6 +59,16 @@ export default (state, action) => {
 				...state,
 				inQueue: false
 			}
+		case 'HOST_GAME':
+			return {
+				...state,
+				isHost: action.payload
+			}
+		case 'LEAVE_HOST':
+			return {
+				...state,
+				isHost: false
+			}
 		case 'INIT_SOCKET':
 			return {
 				...state,
@@ -74,15 +84,12 @@ export default (state, action) => {
 				token: null,
 				user: {
 					_id: randomId,
-					name: randomId.slice(0, 11)
+					name: `${randomId.slice(0, 9)}${randomId.slice(-2)}`
 				}
-			}
-		case 'USER_WON':
-			return {
-				...state,
-				user: action.payload
 			}
 		default:
 			return state
 	}
 }
+
+export default userReducer

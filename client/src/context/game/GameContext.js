@@ -1,7 +1,8 @@
-import React, { createContext, useReducer, useEffect } from 'react'
+import React, { createContext, useReducer, useContext } from 'react'
 import Chess from 'chess.js'
 
 import gameReducer from './gameReducer'
+import { UserContext } from '../user/UserContext'
 
 const GameContext = createContext()
 
@@ -20,6 +21,7 @@ export const initialState = {
 }
 
 const GameContextProvider = (props) => {
+	const { joinQueue } = useContext(UserContext)
 	const [ gameState, gameDispatch ] = useReducer(gameReducer, initialState)
 
 	// INITIALIZE ROOM, GAME FOUND
@@ -31,6 +33,7 @@ const GameContextProvider = (props) => {
 	// START GAME
 	const initGame = () => {
 		gameDispatch({ type: 'GAME_START', payload: new Chess() })
+		joinQueue()
 	}
 
 	// MAKE MOVE
