@@ -90,7 +90,7 @@ const Header = () => {
 	const theme = useTheme()
 	const isSmall = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const [ userState, userDispatch ] = useUser()
+	const [ userState ] = useUser()
 	const { isLoggedIn, inQueue, isHost } = userState
 	// const { userState: { isLoggedIn, inQueue, isHost } } = useContext(UserContext)
 

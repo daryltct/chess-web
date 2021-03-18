@@ -23,7 +23,7 @@ export const initialState = {
 
 const GameContextProvider = (props) => {
 	// const { joinQueue } = useContext(UserContext)
-	const [ userState, userDispatch ] = useUser()
+	const [ , userDispatch ] = useUser()
 	const [ gameState, gameDispatch ] = useReducer(gameReducer, initialState)
 
 	// INITIALIZE ROOM, GAME FOUND

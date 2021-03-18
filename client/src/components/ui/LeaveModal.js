@@ -11,7 +11,7 @@ const LeaveModal = ({ openLeaveModal, leaveGame }) => {
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
-	const [ userState, userDispatch ] = useUser()
+	const [ , userDispatch ] = useUser()
 
 	const [ timer, setTimer ] = useState(5) // 5 seconds timer
 

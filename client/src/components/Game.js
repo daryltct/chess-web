@@ -4,7 +4,8 @@ import Chessboard from 'chessboardjsx'
 // import { UserContext } from '../context/user/UserContext'
 import { useUser, leaveQueue, leaveHost } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
-import { AlertContext } from '../context/alert/AlertContext'
+// import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
 import DisconnectModal from './ui/DisconnectModal'
 import LeaveModal from './ui/LeaveModal'
@@ -104,7 +105,8 @@ const Game = () => {
 
 	const messagesEndRef = useRef(null) // chatbox
 
-	const { setAlert } = useContext(AlertContext)
+	// const { setAlert } = useContext(AlertContext)
+	const [ , alertDispatch ] = useAlert()
 	// const { userState, leaveQueue, leaveHost } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { socket } = userState
@@ -159,14 +161,14 @@ const Game = () => {
 
 			// opponent disconencted
 			const opponentDisconnectHandler = () => {
-				setAlert('OPPONENT DISCONNECTED', 'info')
+				setAlert(alertDispatch, 'OPPONENT DISCONNECTED', 'info')
 				setOpenDisconnectModal(true)
 				pauseGame()
 			}
 
 			// opponent reconnected
 			const opponentReconnectHandler = () => {
-				setAlert('OPPONENT RECONNECTED', 'info')
+				setAlert(alertDispatch, 'OPPONENT RECONNECTED', 'info')
 				setOpenDisconnectModal(false)
 				resumeGame()
 			}

@@ -3,7 +3,8 @@ import axios from 'axios'
 
 import userReducer from './userReducer'
 import loadAuthToken from '../../utils/loadAuthToken'
-import { AlertContext } from '../alert/AlertContext'
+// import { AlertContext } from '../alert/AlertContext'
+import { setAlert } from '../alert/AlertContext'
 
 const UserContext = createContext()
 
@@ -29,26 +30,26 @@ export const loadUser = async (dispatch) => {
 }
 
 // LOGIN USER
-export const login = async (dispatch, form) => {
+export const login = async (dispatch, alertDispatch, form) => {
 	try {
 		const res = await axios.post('/api/auth', form) // token
 		dispatch({ type: 'LOGIN_SUCCESS', payload: res.data })
 		loadUser(dispatch)
 	} catch (err) {
 		dispatch({ type: 'LOGIN_FAIL', payload: err.response.data.msg })
-		// setAlert(err.response.data.msg, 'error')
+		setAlert(alertDispatch, err.response.data.msg, 'error')
 	}
 }
 
 // REGISTER
-export const register = async (dispatch, form) => {
+export const register = async (dispatch, alertDispatch, form) => {
 	try {
 		const res = await axios.post('/api/users', form) // token
 		dispatch({ type: 'REGISTER_SUCCESS', payload: res.data })
 		loadUser(dispatch)
 	} catch (err) {
 		dispatch({ type: 'REGISTER_FAIL', payload: err.response.data.msg })
-		// setAlert(err.response.data.msg, 'error')
+		setAlert(alertDispatch, err.response.data.msg, 'error')
 	}
 }
 

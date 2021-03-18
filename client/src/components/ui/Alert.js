@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 
-import { AlertContext } from '../../context/alert/AlertContext'
+// import { AlertContext } from '../../context/alert/AlertContext'
+import { useAlert } from '../../context/alert/AlertContext'
 
 import { makeStyles } from '@material-ui/core/styles'
 import { Snackbar } from '@material-ui/core'
@@ -23,7 +24,8 @@ const CustomizedAlert = (props) => {
 const Alert = () => {
 	const classes = useStyles()
 
-	const { alertState } = useContext(AlertContext)
+	// const { alertState } = useContext(AlertContext)
+	const [ alertState ] = useAlert()
 
 	return (
 		alertState &&

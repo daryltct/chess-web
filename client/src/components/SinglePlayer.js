@@ -2,7 +2,8 @@ import React, { Fragment, useState, useEffect, useContext } from 'react'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
-import { AlertContext } from '../context/alert/AlertContext'
+// import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
 // import { UserContext } from '../context/user/UserContext'
 import { useUser } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
@@ -49,9 +50,10 @@ const SinglePlayer = () => {
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
-	const { setAlert } = useContext(AlertContext)
+	// const { setAlert } = useContext(AlertContext)
+	const [ , alertDispatch ] = useAlert()
 	// const { userState: { socket } } = useContext(UserContext)
-	const [ userState, userDispatch ] = useUser()
+	const [ userState ] = useUser()
 	const { socket } = userState
 
 	const [ gameState, setGameState ] = useState(initialState)
@@ -106,7 +108,7 @@ const SinglePlayer = () => {
 			}
 		} catch (e) {
 			if (sourceSquare !== targetSquare) {
-				setAlert('INVALID MOVE', 'warning')
+				setAlert(alertDispatch, 'INVALID MOVE', 'warning')
 			}
 		}
 	}

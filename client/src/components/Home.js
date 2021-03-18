@@ -6,7 +6,8 @@ import uniqid from 'uniqid'
 // import { UserContext } from '../context/user/UserContext'
 import { useUser, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
-import { AlertContext } from '../context/alert/AlertContext'
+// import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
 import Game from './Game'
 import { useMainStyles } from './ui/Styles'
 
@@ -54,7 +55,8 @@ const Home = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	const { setAlert } = useContext(AlertContext)
+	// const { setAlert } = useContext(AlertContext)
+	const [ , alertDispatch ] = useAlert()
 	// const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { gameState, initRoom, reconnectGame } = useContext(GameContext)
@@ -86,7 +88,7 @@ const Home = () => {
 			}
 
 			const errorHandler = (data) => {
-				setAlert(data, 'error')
+				setAlert(alertDispatch, data, 'error')
 			}
 
 			if (socket) {

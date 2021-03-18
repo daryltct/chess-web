@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
+import { useAlert } from '../context/alert/AlertContext'
 // import { UserContext } from '../context/user/UserContext'
 import { useUser, register } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
@@ -11,6 +12,7 @@ const Register = () => {
 	let history = useHistory()
 	const mainClasses = useMainStyles()
 
+	const [ , alertDispatch ] = useAlert()
 	// const { register, userState } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
@@ -43,7 +45,7 @@ const Register = () => {
 
 	const handleSubmit = (event) => {
 		event.preventDefault()
-		register(userDispatch, user)
+		register(userDispatch, alertDispatch, user)
 	}
 
 	return (

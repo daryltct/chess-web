@@ -6,7 +6,7 @@ import { useUser } from '../context/user/UserContext'
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
 	// const { userState } = useContext(UserContext)
-	const [ userState, userDispatch ] = useUser()
+	const [ userState ] = useUser()
 
 	return (
 		<Route

@@ -3,7 +3,8 @@ import axios from 'axios'
 
 // import { UserContext } from '../context/user/UserContext'
 import { useUser, loadUser } from '../context/user/UserContext'
-import { AlertContext } from '../context/alert/AlertContext'
+// import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -33,7 +34,8 @@ const Profile = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	const { setAlert } = useContext(AlertContext)
+	// const { setAlert } = useContext(AlertContext)
+	const [ , alertDispatch ] = useAlert()
 	// const { loadUser, userState } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { user, isGuest, socket } = userState
@@ -48,7 +50,7 @@ const Profile = () => {
 				setRank(res.data.rank)
 				setTop5(res.data.users)
 			} catch (err) {
-				setAlert(err.response.data.msg, 'error')
+				setAlert(alertDispatch, err.response.data.msg, 'error')
 			}
 		}
 		if (socket) {
