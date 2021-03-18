@@ -3,7 +3,8 @@ import io from 'socket.io-client'
 import Typewriter from 'typewriter-effect'
 import uniqid from 'uniqid'
 
-import { UserContext } from '../context/user/UserContext'
+// import { UserContext } from '../context/user/UserContext'
+import { useUser, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
 import { AlertContext } from '../context/alert/AlertContext'
 import Game from './Game'
@@ -54,7 +55,8 @@ const Home = () => {
 	const classes = useStyles()
 
 	const { setAlert } = useContext(AlertContext)
-	const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
+	// const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
+	const [ userState, userDispatch ] = useUser()
 	const { gameState, initRoom, reconnectGame } = useContext(GameContext)
 
 	const { socket, inQueue, isHost, user } = userState
@@ -66,6 +68,7 @@ const Home = () => {
 		() => {
 			if (user) {
 				initSocket(
+					userDispatch,
 					io(PORT, {
 						query: { playerId: user._id, playerName: user.name }
 					})
@@ -79,7 +82,7 @@ const Home = () => {
 		() => {
 			const reconnectHandler = (data) => {
 				reconnectGame(data)
-				joinQueue()
+				joinQueue(userDispatch)
 			}
 
 			const errorHandler = (data) => {
@@ -87,7 +90,7 @@ const Home = () => {
 			}
 
 			if (socket) {
-				socket.on('gameStart', initRoom)
+				socket.on('gameStart', () => initRoom)
 				socket.on('reconnect', reconnectHandler)
 				socket.on('error', errorHandler)
 
@@ -105,10 +108,10 @@ const Home = () => {
 	const toggleQueue = () => {
 		if (!inQueue) {
 			socket.emit('findGame', true)
-			joinQueue()
+			joinQueue(userDispatch)
 		} else {
 			socket.emit('findGame', false)
-			leaveQueue()
+			leaveQueue(userDispatch)
 		}
 	}
 
@@ -117,10 +120,10 @@ const Home = () => {
 		if (!isHost) {
 			const roomId = uniqid()
 			socket.emit('hostRoom', { roomId, signal: true })
-			hostGame(roomId)
+			hostGame(userDispatch, roomId)
 		} else {
 			socket.emit('hostRoom', { roomId: isHost, signal: false })
-			leaveHost()
+			leaveHost(userDispatch)
 		}
 	}
 

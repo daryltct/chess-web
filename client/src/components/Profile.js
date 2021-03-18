@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
 
-import { UserContext } from '../context/user/UserContext'
+// import { UserContext } from '../context/user/UserContext'
+import { useUser, loadUser } from '../context/user/UserContext'
 import { AlertContext } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
 
@@ -33,7 +34,8 @@ const Profile = () => {
 	const classes = useStyles()
 
 	const { setAlert } = useContext(AlertContext)
-	const { loadUser, userState } = useContext(UserContext)
+	// const { loadUser, userState } = useContext(UserContext)
+	const [ userState, userDispatch ] = useUser()
 	const { user, isGuest, socket } = userState
 
 	const [ top5, setTop5 ] = useState(null)
@@ -53,7 +55,7 @@ const Profile = () => {
 			socket.close()
 		}
 		if (!isGuest) {
-			loadUser()
+			loadUser(userDispatch)
 			getUsers()
 		}
 	}, [])

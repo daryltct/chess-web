@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext, useRef } from 'react'
 import Chessboard from 'chessboardjsx'
 
-import { UserContext } from '../context/user/UserContext'
+// import { UserContext } from '../context/user/UserContext'
+import { useUser, leaveQueue, leaveHost } from '../context/user/UserContext'
 import { GameContext } from '../context/game/GameContext'
 import { AlertContext } from '../context/alert/AlertContext'
 import { useMainStyles } from './ui/Styles'
@@ -104,7 +105,8 @@ const Game = () => {
 	const messagesEndRef = useRef(null) // chatbox
 
 	const { setAlert } = useContext(AlertContext)
-	const { userState, leaveQueue, leaveHost } = useContext(UserContext)
+	// const { userState, leaveQueue, leaveHost } = useContext(UserContext)
+	const [ userState, userDispatch ] = useUser()
 	const { socket } = userState
 	const {
 		gameState,
@@ -281,8 +283,8 @@ const Game = () => {
 	const leaveGameHandler = (voidRoom) => {
 		socket.emit('playerLeave', { roomId, voidRoom })
 		leaveGame()
-		leaveQueue()
-		leaveHost()
+		leaveQueue(userDispatch)
+		leaveHost(userDispatch)
 	}
 
 	// chat input update
@@ -423,12 +425,7 @@ const Game = () => {
 			{/* Display modal when opponent disconnected */}
 			<DisconnectModal openDisconnectModal={openDisconnectModal} leaveGameHandler={leaveGameHandler} />
 			{/* Display modal when opponent leaves */}
-			<LeaveModal
-				openLeaveModal={openLeaveModal}
-				leaveGame={leaveGame}
-				leaveQueue={leaveQueue}
-				leaveHost={leaveHost}
-			/>
+			<LeaveModal openLeaveModal={openLeaveModal} leaveGame={leaveGame} />
 		</Grid>
 	)
 }

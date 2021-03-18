@@ -3,7 +3,8 @@ import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
 import { AlertContext } from '../context/alert/AlertContext'
-import { UserContext } from '../context/user/UserContext'
+// import { UserContext } from '../context/user/UserContext'
+import { useUser } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -49,7 +50,9 @@ const SinglePlayer = () => {
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
 	const { setAlert } = useContext(AlertContext)
-	const { userState: { socket } } = useContext(UserContext)
+	// const { userState: { socket } } = useContext(UserContext)
+	const [ userState, userDispatch ] = useUser()
+	const { socket } = userState
 
 	const [ gameState, setGameState ] = useState(initialState)
 	const { level, game, fen, turn, isFinished, winner } = gameState

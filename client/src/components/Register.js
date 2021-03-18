@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
-import { UserContext } from '../context/user/UserContext'
+// import { UserContext } from '../context/user/UserContext'
+import { useUser, register } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
 import { Grid, Typography, Button, TextField } from '@material-ui/core'
@@ -10,7 +11,8 @@ const Register = () => {
 	let history = useHistory()
 	const mainClasses = useMainStyles()
 
-	const { register, userState } = useContext(UserContext)
+	// const { register, userState } = useContext(UserContext)
+	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 
 	const [ user, setUser ] = useState({
@@ -41,7 +43,7 @@ const Register = () => {
 
 	const handleSubmit = (event) => {
 		event.preventDefault()
-		register(user)
+		register(userDispatch, user)
 	}
 
 	return (
