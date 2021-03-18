@@ -1,7 +1,6 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-// import { UserContext } from '../../context/user/UserContext'
 import { useUser } from '../../context/user/UserContext'
 
 import { makeStyles } from '@material-ui/styles'
@@ -92,7 +91,6 @@ const Header = () => {
 
 	const [ userState ] = useUser()
 	const { isLoggedIn, inQueue, isHost } = userState
-	// const { userState: { isLoggedIn, inQueue, isHost } } = useContext(UserContext)
 
 	const [ active, setActive ] = useState(0)
 	const [ openDrawer, setOpenDrawer ] = useState(false)

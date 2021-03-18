@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
-// import { UserContext } from '../context/user/UserContext'
-import { useUser, loadUser } from '../context/user/UserContext'
-// import { AlertContext } from '../context/alert/AlertContext'
 import { useAlert, setAlert } from '../context/alert/AlertContext'
+import { useUser, loadUser } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -34,9 +32,7 @@ const Profile = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	// const { setAlert } = useContext(AlertContext)
 	const [ , alertDispatch ] = useAlert()
-	// const { loadUser, userState } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { user, isGuest, socket } = userState
 

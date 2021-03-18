@@ -2,7 +2,6 @@ import React, { createContext, useReducer, useContext } from 'react'
 import Chess from 'chess.js'
 
 import gameReducer from './gameReducer'
-// import { UserContext } from '../user/UserContext'
 import { joinQueue } from '../user/UserContext'
 
 const GameContext = createContext()

@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
-// import { UserContext } from '../context/user/UserContext'
-import { useUser, login, loginGuest } from '../context/user/UserContext'
 import { useAlert } from '../context/alert/AlertContext'
+import { useUser, login, loginGuest } from '../context/user/UserContext'
 import { useMainStyles, getModalStyle } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -30,7 +29,6 @@ const Login = () => {
 	const classes = useStyles()
 
 	const [ , alertDispatch ] = useAlert()
-	// const { login, userState, loginGuest } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 

@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Chessboard from 'chessboardjsx'
 
-// import { UserContext } from '../context/user/UserContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
 import { useUser, leaveQueue, leaveHost } from '../context/user/UserContext'
-// import { GameContext } from '../context/game/GameContext'
 import {
 	useGame,
 	initGame,
@@ -17,8 +16,7 @@ import {
 	pauseGame,
 	resumeGame
 } from '../context/game/GameContext'
-// import { AlertContext } from '../context/alert/AlertContext'
-import { useAlert, setAlert } from '../context/alert/AlertContext'
+
 import { useMainStyles } from './ui/Styles'
 import DisconnectModal from './ui/DisconnectModal'
 import LeaveModal from './ui/LeaveModal'
@@ -118,25 +116,10 @@ const Game = () => {
 
 	const messagesEndRef = useRef(null) // chatbox
 
-	// const { setAlert } = useContext(AlertContext)
 	const [ , alertDispatch ] = useAlert()
-	// const { userState, leaveQueue, leaveHost } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
-	const { socket } = userState
-	// const {
-	// 	gameState,
-	// 	initGame,
-	// 	makeMove,
-	// 	gameEnd,
-	// 	receiveRematch,
-	// 	initRematch,
-	// 	declineRematch,
-	// 	acceptRematch,
-	// 	leaveGame,
-	// 	pauseGame,
-	// 	resumeGame
-	// } = useContext(GameContext)
 	const [ gameState, gameDispatch ] = useGame()
+	const { socket } = userState
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent, history } = gameState
 
 	const [ openDisconnectModal, setOpenDisconnectModal ] = useState(false)

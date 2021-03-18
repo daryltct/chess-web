@@ -1,14 +1,11 @@
-import React, { Fragment, useEffect, useContext, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import io from 'socket.io-client'
 import Typewriter from 'typewriter-effect'
 import uniqid from 'uniqid'
 
-// import { UserContext } from '../context/user/UserContext'
-import { useUser, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } from '../context/user/UserContext'
-// import { GameContext } from '../context/game/GameContext'
-import { useGame, initRoom, reconnectGame } from '../context/game/GameContext'
-// import { AlertContext } from '../context/alert/AlertContext'
 import { useAlert, setAlert } from '../context/alert/AlertContext'
+import { useUser, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } from '../context/user/UserContext'
+import { useGame, initRoom, reconnectGame } from '../context/game/GameContext'
 import Game from './Game'
 import { useMainStyles } from './ui/Styles'
 
@@ -56,13 +53,9 @@ const Home = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	// const { setAlert } = useContext(AlertContext)
 	const [ , alertDispatch ] = useAlert()
-	// const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
-	// const { gameState, initRoom, reconnectGame } = useContext(GameContext)
 	const [ gameState, gameDispatch ] = useGame()
-
 	const { socket, inQueue, isHost, user } = userState
 
 	const [ roomInput, setRoomInput ] = useState('')

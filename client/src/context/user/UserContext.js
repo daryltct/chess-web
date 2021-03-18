@@ -3,7 +3,6 @@ import axios from 'axios'
 
 import userReducer from './userReducer'
 import loadAuthToken from '../../utils/loadAuthToken'
-// import { AlertContext } from '../alert/AlertContext'
 import { setAlert } from '../alert/AlertContext'
 
 const UserContext = createContext()
@@ -97,7 +96,6 @@ export const initialState = {
 }
 
 const UserContextProvider = (props) => {
-	// const { setAlert } = useContext(AlertContext)
 	const [ userState, userDispatch ] = useReducer(userReducer, initialState)
 
 	// load token on initial render

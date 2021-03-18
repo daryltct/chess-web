@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
 import { useAlert } from '../context/alert/AlertContext'
-// import { UserContext } from '../context/user/UserContext'
 import { useUser, register } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
@@ -13,7 +12,6 @@ const Register = () => {
 	const mainClasses = useMainStyles()
 
 	const [ , alertDispatch ] = useAlert()
-	// const { register, userState } = useContext(UserContext)
 	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 

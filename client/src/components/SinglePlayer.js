@@ -1,10 +1,8 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import Chessboard from 'chessboardjsx'
 import { Game } from 'js-chess-engine'
 
-// import { AlertContext } from '../context/alert/AlertContext'
 import { useAlert, setAlert } from '../context/alert/AlertContext'
-// import { UserContext } from '../context/user/UserContext'
 import { useUser } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
@@ -50,9 +48,7 @@ const SinglePlayer = () => {
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
-	// const { setAlert } = useContext(AlertContext)
 	const [ , alertDispatch ] = useAlert()
-	// const { userState: { socket } } = useContext(UserContext)
 	const [ userState ] = useUser()
 	const { socket } = userState
 
