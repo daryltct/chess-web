@@ -35,14 +35,16 @@ io.on('connection', (socket) => {
 	socket.playerId = socket.handshake.query.playerId // attach playerId to socket
 	socket.playerName = socket.handshake.query.playerName // attach playerName to socket
 
-	// if not guest, attempt to reconnect
+	// check if user is a guest
 	if (socket.playerId.substring(0, 5) !== 'guest') {
+		// if not guest, attempt to reconnect to an active game
 		socket.isGuest = false
 		attemptReconnect(socket)
 	} else {
 		socket.isGuest = true
 	}
 
+	// user joins/leaves player queue
 	socket.on('findGame', (signal) => {
 		if (signal) {
 			playerQueue.push(socket)
@@ -57,6 +59,7 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	// user makes a move in chess game
 	socket.on('move', async (data) => {
 		try {
 			// update room in database with new game state
@@ -68,6 +71,7 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	// ongoing game has ended
 	socket.on('gameEnd', (data) => {
 		updateStatsOnGameEnd(data)
 		swapColor(data.roomId)
@@ -77,6 +81,7 @@ io.on('connection', (socket) => {
 			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
 	})
 
+	// user initiating/accepting/declining a rematch request
 	socket.on('rematch', (data) => {
 		// update color on socket object
 		socket.color = socket.color === 'white' ? 'black' : 'white'
@@ -84,34 +89,33 @@ io.on('connection', (socket) => {
 		socket.to(data.roomId).emit('rematch', { ...data.opponent })
 	})
 
+	// user has left game/room
 	socket.on('playerLeave', async (data) => {
 		const oppColor = socket.color === 'white' ? 'black' : 'white'
 		try {
 			const room = await Room.findById(data.roomId)
 			if (!room) return
 
-			// if game has ended or if it's a private game
-			if (!room.inProgress || room.isPrivate) {
+			// if game has ended or if it's a private game or void game is true - don't update stats
+			if (!room.inProgress || room.isPrivate || data.voidRoom) {
 				socket.to(data.roomId).emit('playerLeave', 'Opponent has left')
 				closeRoom(data.roomId)
 				return
 			}
 
-			// if game is in progress
+			// if game is in progress - update stats
 			// calculate expected score to update elo rating
 			const myExpectedScore = elo.getExpected(room[socket.color].elo, room[oppColor].elo)
 			const oppExpectedScore = elo.getExpected(room[oppColor].elo, room[socket.color].elo)
 
-			// if opposing player is: active - player lose, opp win
+			// if opposing player is active - player lose, opp win
 			if (room[oppColor].isActive) {
 				updateUserGames(socket.playerId, 'loss', room[socket.color].elo, myExpectedScore)
 				updateUserGames(room[oppColor].playerId, 'win', room[oppColor].elo, oppExpectedScore)
 			} else {
-				// if opposing player is inactive and void room is false - player win, opp lose
-				if (!data.voidRoom) {
-					updateUserGames(socket.playerId, 'win', room[socket.color].elo, myExpectedScore)
-					updateUserGames(room[oppColor].playerId, 'loss', room[oppColor].elo, oppExpectedScore)
-				}
+				// if opposing player is inactive - player win, opp lose
+				updateUserGames(socket.playerId, 'win', room[socket.color].elo, myExpectedScore)
+				updateUserGames(room[oppColor].playerId, 'loss', room[oppColor].elo, oppExpectedScore)
 			}
 			// close the room
 			closeRoom(data.roomId)
@@ -121,10 +125,12 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	// user sent a message in game
 	socket.on('message', (data) => {
 		socket.to(data.roomId).emit('message', data.message)
 	})
 
+	// user hosted/closed a private game
 	socket.on('hostRoom', (data) => {
 		const { roomId, signal } = data
 		if (signal) {
@@ -139,14 +145,16 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	// user attempting to join a private game
 	socket.on('joinHost', (roomId) => {
 		const roomIndex = hostedRooms.findIndex((r) => r.roomId === roomId)
 		if (roomIndex === -1) {
 			socket.emit('error', 'Room does not exist')
 			return
 		}
-		const roomObj = hostedRooms[roomIndex]
 
+		const roomObj = hostedRooms[roomIndex]
+		// prevent same user from joining same room
 		if (roomObj.player.playerId === socket.playerId) {
 			socket.emit('error', 'Unable to join room hosted by yourself')
 		} else {
@@ -156,10 +164,12 @@ io.on('connection', (socket) => {
 		}
 	})
 
+	// user disconnecting
 	socket.on('disconnecting', () => {
 		disconnectProcess(socket)
 	})
 
+	// user disconnected
 	socket.on('disconnect', () => {
 		// remove user from player queue
 		const playerIndex = playerQueue.findIndex((s) => s.id === socket.id)

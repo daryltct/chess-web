@@ -48,6 +48,7 @@ const startGame = async (playerQueue, privatePlayer1 = null, privatePlayer2 = nu
 		return
 	}
 
+	// randomly assign colors to players
 	const coinFlip = Math.random() > 0.5
 	const whitePlayer = coinFlip ? player1 : player2
 	const blackPlayer = coinFlip ? player2 : player1
