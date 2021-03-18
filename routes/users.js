@@ -69,6 +69,7 @@ router.post(
 			console.error(e)
 			res.status(500).json({ msg: 'Server Error' })
 		}
+		console.log(`POST /api/users`)
 	}
 )
 
@@ -89,6 +90,7 @@ router.put('/', checkToken, async (req, res) => {
 		console.error(e)
 		res.status(500).json({ msg: 'Server Error' })
 	}
+	console.log(`PUT /api/users`)
 })
 
 // GET api/users/
@@ -107,6 +109,7 @@ router.get('/', checkToken, async (req, res) => {
 		console.error(e)
 		res.status(500).json({ msg: 'Server Error' })
 	}
+	console.log(`GET /api/users`)
 })
 
 module.exports = router
