@@ -263,6 +263,10 @@ const Game = () => {
 
 	// display possible moves
 	const onMouseOverSquare = (square) => {
+		// hide possible moves of opposing color
+		const pieceAtSquare = game.get(square)
+		if (!pieceAtSquare || pieceAtSquare.color !== color.charAt(0)) return
+
 		// retrieve list of possible moves from current square
 		const moves = game.moves({ square, verbose: true })
 
@@ -275,6 +279,7 @@ const Game = () => {
 		highlightSquare(square, squaresToHighlight)
 	}
 
+	// remove possible moves
 	const onMouseOutSquare = () => {
 		setSquareStyles({})
 	}
@@ -285,7 +290,7 @@ const Game = () => {
 				...accum,
 				...{
 					[curr]: {
-						background: 'radial-gradient(circle, #ADFFCB 35%, transparent 40%)',
+						background: 'radial-gradient(circle, #F4FFF8 35%, transparent 40%)',
 						borderRadius: '50%'
 					}
 				}
