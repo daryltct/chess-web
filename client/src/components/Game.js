@@ -16,7 +16,6 @@ import {
 	pauseGame,
 	resumeGame
 } from '../context/game/GameContext'
-
 import { useMainStyles } from './ui/Styles'
 import DisconnectModal from './ui/DisconnectModal'
 import LeaveModal from './ui/LeaveModal'
@@ -126,6 +125,7 @@ const Game = () => {
 	const [ openLeaveModal, setOpenLeaveModal ] = useState(false)
 	const [ chat, setChat ] = useState([])
 	const [ message, setMessage ] = useState('')
+	const [ squareStyles, setSquareStyles ] = useState({})
 
 	useEffect(
 		() => {
@@ -261,6 +261,44 @@ const Game = () => {
 		}
 	}
 
+	// display possible moves
+	const onMouseOverSquare = (square) => {
+		// hide possible moves of opposing color
+		const pieceAtSquare = game.get(square)
+		if (!pieceAtSquare || pieceAtSquare.color !== color.charAt(0)) return
+
+		// retrieve list of possible moves from current square
+		const moves = game.moves({ square, verbose: true })
+
+		// if no possible moves
+		if (!moves.length) return
+
+		const squaresToHighlight = []
+		moves.forEach((move) => squaresToHighlight.push(move.to))
+
+		highlightSquare(square, squaresToHighlight)
+	}
+
+	// remove possible moves
+	const onMouseOutSquare = () => {
+		setSquareStyles({})
+	}
+
+	const highlightSquare = (sourceSquare, squaresToHighlight) => {
+		const highlightStyles = [ sourceSquare, ...squaresToHighlight ].reduce((accum, curr) => {
+			return {
+				...accum,
+				...{
+					[curr]: {
+						background: 'radial-gradient(circle, #F4FFF8 35%, transparent 40%)',
+						borderRadius: '50%'
+					}
+				}
+			}
+		}, {})
+		setSquareStyles({ ...highlightStyles })
+	}
+
 	// initiate/accept rematch
 	const initiateRematch = () => {
 		acceptRematch(gameDispatch)
@@ -349,6 +387,9 @@ const Game = () => {
 						orientation={color}
 						draggable={turn === color.charAt(0)}
 						width={isXS ? xsScreenSize : isMD ? mdScreenSize : lgScreenSize}
+						squareStyles={squareStyles}
+						onMouseOverSquare={onMouseOverSquare}
+						onMouseOutSquare={onMouseOutSquare}
 					/>
 				</Grid>
 				{/* Chatbox */}
