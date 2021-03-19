@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
-import { UserContext } from '../context/user/UserContext'
+import { useAlert } from '../context/alert/AlertContext'
+import { useUser, register } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
 import { Grid, Typography, Button, TextField } from '@material-ui/core'
@@ -10,7 +11,8 @@ const Register = () => {
 	let history = useHistory()
 	const mainClasses = useMainStyles()
 
-	const { register, userState } = useContext(UserContext)
+	const [ , alertDispatch ] = useAlert()
+	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 
 	const [ user, setUser ] = useState({
@@ -27,7 +29,7 @@ const Register = () => {
 				history.push('/')
 			}
 		},
-		[ isLoggedIn ]
+		[ isLoggedIn, history ]
 	)
 
 	// input fields update
@@ -41,7 +43,7 @@ const Register = () => {
 
 	const handleSubmit = (event) => {
 		event.preventDefault()
-		register(user)
+		register(userDispatch, alertDispatch, user)
 	}
 
 	return (

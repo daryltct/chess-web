@@ -3,9 +3,86 @@ import axios from 'axios'
 
 import userReducer from './userReducer'
 import loadAuthToken from '../../utils/loadAuthToken'
-import { AlertContext } from '../alert/AlertContext'
+import { setAlert } from '../alert/AlertContext'
 
 const UserContext = createContext()
+
+// ############### CUSTOM HOOK ###############
+export const useUser = () => {
+	const { userState, userDispatch } = useContext(UserContext)
+	return [ userState, userDispatch ]
+}
+
+// ############# ACTION CREATORS #############
+
+// LOAD USER
+export const loadUser = async (dispatch) => {
+	// load token into axios headers
+	loadAuthToken(sessionStorage.token)
+
+	try {
+		const res = await axios.get('/api/auth')
+		dispatch({ type: 'USER_LOADED', payload: res.data })
+	} catch (err) {
+		dispatch({ type: 'AUTH_ERROR' })
+	}
+}
+
+// LOGIN USER
+export const login = async (dispatch, alertDispatch, form) => {
+	try {
+		const res = await axios.post('/api/auth', form) // token
+		dispatch({ type: 'LOGIN_SUCCESS', payload: res.data })
+		loadUser(dispatch)
+	} catch (err) {
+		dispatch({ type: 'LOGIN_FAIL', payload: err.response.data.msg })
+		setAlert(alertDispatch, err.response.data.msg, 'error')
+	}
+}
+
+// REGISTER
+export const register = async (dispatch, alertDispatch, form) => {
+	try {
+		const res = await axios.post('/api/users', form) // token
+		dispatch({ type: 'REGISTER_SUCCESS', payload: res.data })
+		loadUser(dispatch)
+	} catch (err) {
+		dispatch({ type: 'REGISTER_FAIL', payload: err.response.data.msg })
+		setAlert(alertDispatch, err.response.data.msg, 'error')
+	}
+}
+
+// GUEST LOGIN
+export const loginGuest = (dispatch) => {
+	dispatch({ type: 'LOGIN_GUEST' })
+}
+
+// INITIALIZE SOCKET
+export const initSocket = (dispatch, socket) => {
+	dispatch({ type: 'INIT_SOCKET', payload: socket })
+}
+
+// JOIN QUEUE
+export const joinQueue = (dispatch) => {
+	dispatch({ type: 'JOIN_QUEUE' })
+}
+
+// LEAVE QUEUE
+export const leaveQueue = (dispatch) => {
+	dispatch({ type: 'LEAVE_QUEUE' })
+}
+
+// HOST GAME
+export const hostGame = (dispatch, roomId) => {
+	dispatch({ type: 'HOST_GAME', payload: roomId })
+}
+
+// LEAVE HOST
+export const leaveHost = (dispatch) => {
+	dispatch({ type: 'LEAVE_HOST' })
+}
+
+// ############# CONTEXT PROVIDER #############
 
 export const initialState = {
 	isLoggedIn: false,
@@ -19,11 +96,14 @@ export const initialState = {
 }
 
 const UserContextProvider = (props) => {
-	const { setAlert } = useContext(AlertContext)
 	const [ userState, userDispatch ] = useReducer(userReducer, initialState)
 
 	// load token on initial render
 	loadAuthToken(userState.token)
+
+	if (userState.isLoading) {
+		loadUser(userDispatch)
+	}
 
 	useEffect(
 		() => {
@@ -32,95 +112,7 @@ const UserContextProvider = (props) => {
 		[ userState.token ]
 	)
 
-	// LOAD USER
-	const loadUser = async () => {
-		// load token into axios headers
-		loadAuthToken(sessionStorage.token)
-
-		try {
-			const res = await axios.get('/api/auth')
-			userDispatch({ type: 'USER_LOADED', payload: res.data })
-		} catch (err) {
-			userDispatch({ type: 'AUTH_ERROR' })
-		}
-	}
-
-	// LOGIN USER
-	const login = async (form) => {
-		try {
-			const res = await axios.post('/api/auth', form) // token
-			userDispatch({ type: 'LOGIN_SUCCESS', payload: res.data })
-			loadUser()
-		} catch (err) {
-			userDispatch({ type: 'LOGIN_FAIL', payload: err.response.data.msg })
-			setAlert(err.response.data.msg, 'error')
-		}
-	}
-
-	// REGISTER
-	const register = async (form) => {
-		try {
-			const res = await axios.post('/api/users', form) // token
-			userDispatch({ type: 'REGISTER_SUCCESS', payload: res.data })
-			loadUser()
-		} catch (err) {
-			userDispatch({ type: 'REGISTER_FAIL', payload: err.response.data.msg })
-			setAlert(err.response.data.msg, 'error')
-		}
-	}
-
-	// UPDATE USER STATE
-	const initSocket = (socket) => {
-		userDispatch({ type: 'INIT_SOCKET', payload: socket })
-	}
-
-	// JOIN QUEUE
-	const joinQueue = () => {
-		userDispatch({ type: 'JOIN_QUEUE' })
-	}
-
-	// LEAVE QUEUE
-	const leaveQueue = () => {
-		userDispatch({ type: 'LEAVE_QUEUE' })
-	}
-
-	// HOST GAME
-	const hostGame = (roomId) => {
-		userDispatch({ type: 'HOST_GAME', payload: roomId })
-	}
-
-	// LEAVE HOST
-	const leaveHost = () => {
-		userDispatch({ type: 'LEAVE_HOST' })
-	}
-
-	// GUEST LOGIN
-	const loginGuest = () => {
-		userDispatch({ type: 'LOGIN_GUEST' })
-	}
-
-	if (userState.isLoading) {
-		loadUser()
-	}
-
-	return (
-		<UserContext.Provider
-			value={{
-				userState,
-				loadUser,
-				login,
-				register,
-				initSocket,
-				joinQueue,
-				leaveQueue,
-				hostGame,
-				leaveHost,
-				loginGuest
-			}}
-		>
-			{props.children}
-		</UserContext.Provider>
-	)
+	return <UserContext.Provider value={{ userState, userDispatch }}>{props.children}</UserContext.Provider>
 }
 
-export { UserContext, UserContextProvider }
+export default UserContextProvider

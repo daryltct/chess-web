@@ -1,9 +1,22 @@
-import React, { useState, useEffect, useContext, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Chessboard from 'chessboardjsx'
 
-import { UserContext } from '../context/user/UserContext'
-import { GameContext } from '../context/game/GameContext'
-import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
+import { useUser, leaveQueue, leaveHost } from '../context/user/UserContext'
+import {
+	useGame,
+	initGame,
+	makeMove,
+	gameEnd,
+	receiveRematch,
+	initRematch,
+	declineRematch,
+	acceptRematch,
+	leaveGame,
+	pauseGame,
+	resumeGame
+} from '../context/game/GameContext'
+
 import { useMainStyles } from './ui/Styles'
 import DisconnectModal from './ui/DisconnectModal'
 import LeaveModal from './ui/LeaveModal'
@@ -103,22 +116,10 @@ const Game = () => {
 
 	const messagesEndRef = useRef(null) // chatbox
 
-	const { setAlert } = useContext(AlertContext)
-	const { userState, leaveQueue, leaveHost } = useContext(UserContext)
+	const [ , alertDispatch ] = useAlert()
+	const [ userState, userDispatch ] = useUser()
+	const [ gameState, gameDispatch ] = useGame()
 	const { socket } = userState
-	const {
-		gameState,
-		initGame,
-		makeMove,
-		gameEnd,
-		receiveRematch,
-		initRematch,
-		declineRematch,
-		acceptRematch,
-		leaveGame,
-		pauseGame,
-		resumeGame
-	} = useContext(GameContext)
 	const { game, roomId, color, fen, turn, winner, reason, rematch, opponent, history } = gameState
 
 	const [ openDisconnectModal, setOpenDisconnectModal ] = useState(false)
@@ -126,47 +127,55 @@ const Game = () => {
 	const [ chat, setChat ] = useState([])
 	const [ message, setMessage ] = useState('')
 
-	useEffect(() => {
-		if (!game) {
-			initGame()
-		}
-		// scroll to bottom of chat on each message added
-		if (messagesEndRef) {
-			messagesEndRef.current.addEventListener('DOMNodeInserted', (event) => {
-				const { currentTarget: target } = event
-				target.scroll({ top: target.scrollHeight, behavior: 'smooth' })
-			})
-		}
-	}, [])
+	useEffect(
+		() => {
+			if (!game) {
+				initGame(gameDispatch, userDispatch)
+			}
+			// scroll to bottom of chat on each message added
+			if (messagesEndRef) {
+				messagesEndRef.current.addEventListener('DOMNodeInserted', (event) => {
+					const { currentTarget: target } = event
+					target.scroll({ top: target.scrollHeight, behavior: 'smooth' })
+				})
+			}
+		},
+		[ game, userDispatch, gameDispatch ]
+	)
 
 	useEffect(
 		() => {
 			// opponent makes move
 			const moveHandler = (move) => {
 				game.move(move)
-				makeMove()
+				makeMove(gameDispatch)
 			}
 
 			// opponent won game
 			const gameEndHandler = (data) => {
 				const { move, winner, reason } = data
 				game.move(move)
-				makeMove()
-				gameEnd({ winner, reason })
+				makeMove(gameDispatch)
+				gameEnd(gameDispatch, { winner, reason })
+			}
+
+			// receive rematch request/decline
+			const rematchHandler = (data) => {
+				receiveRematch(gameDispatch, data)
 			}
 
 			// opponent disconencted
 			const opponentDisconnectHandler = () => {
-				setAlert('OPPONENT DISCONNECTED', 'info')
+				setAlert(alertDispatch, 'OPPONENT DISCONNECTED', 'info')
 				setOpenDisconnectModal(true)
-				pauseGame()
+				pauseGame(gameDispatch)
 			}
 
 			// opponent reconnected
 			const opponentReconnectHandler = () => {
-				setAlert('OPPONENT RECONNECTED', 'info')
+				setAlert(alertDispatch, 'OPPONENT RECONNECTED', 'info')
 				setOpenDisconnectModal(false)
-				resumeGame()
+				resumeGame(gameDispatch)
 			}
 
 			// opponent left game
@@ -182,7 +191,7 @@ const Game = () => {
 			if (socket && game) {
 				socket.on('move', moveHandler)
 				socket.on('gameEnd', gameEndHandler)
-				socket.on('rematch', receiveRematch)
+				socket.on('rematch', rematchHandler)
 				socket.on('playerDisconnect', opponentDisconnectHandler)
 				socket.on('playerReconnect', opponentReconnectHandler)
 				socket.on('playerLeave', playerLeaveHandler)
@@ -191,7 +200,7 @@ const Game = () => {
 				return () => {
 					socket.off('move', moveHandler)
 					socket.off('gameEnd', gameEndHandler)
-					socket.off('rematch', receiveRematch)
+					socket.off('rematch', rematchHandler)
 					socket.off('playerDisconnect', opponentDisconnectHandler)
 					socket.off('playerReconnect', opponentReconnectHandler)
 					socket.off('playerLeave', playerLeaveHandler)
@@ -199,7 +208,7 @@ const Game = () => {
 				}
 			}
 		},
-		[ socket, game, rematch, gameState ]
+		[ socket, game, rematch, gameState, alertDispatch, gameDispatch ]
 	)
 
 	// if this player and opponent both 'true' in rematch, then restart board
@@ -207,11 +216,11 @@ const Game = () => {
 		() => {
 			if (gameState) {
 				if (opponent.rematch && rematch) {
-					initRematch()
+					initRematch(gameDispatch)
 				}
 			}
 		},
-		[ gameState, opponent ]
+		[ gameState, opponent, rematch, gameDispatch ]
 	)
 
 	// provide updates on move in chat
@@ -236,17 +245,17 @@ const Game = () => {
 		// if illegal move
 		if (move === null) return
 		// else alter game state
-		makeMove()
+		makeMove(gameDispatch)
 		// check winning conditions
 		if (game.in_checkmate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'checkmate' })
-			gameEnd({ winner: color, reason: 'checkmate' })
+			gameEnd(gameDispatch, { winner: color, reason: 'checkmate' })
 		} else if (game.in_stalemate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'stalemate' })
-			gameEnd({ winner: color, reason: 'stalemate' })
+			gameEnd(gameDispatch, { winner: color, reason: 'stalemate' })
 		} else if (game.in_draw()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'draw' })
-			gameEnd({ winner: color, reason: 'draw' })
+			gameEnd(gameDispatch, { winner: color, reason: 'draw' })
 		} else {
 			socket.emit('move', { roomId, move, pgn: game.pgn() })
 		}
@@ -254,7 +263,7 @@ const Game = () => {
 
 	// initiate/accept rematch
 	const initiateRematch = () => {
-		acceptRematch()
+		acceptRematch(gameDispatch)
 		socket.emit('rematch', {
 			roomId,
 			opponent: {
@@ -266,7 +275,7 @@ const Game = () => {
 
 	// decline rematch
 	const declineRematchHandler = () => {
-		declineRematch()
+		declineRematch(gameDispatch)
 		socket.emit('rematch', {
 			roomId,
 			opponent: {
@@ -280,9 +289,9 @@ const Game = () => {
 	// leave game
 	const leaveGameHandler = (voidRoom) => {
 		socket.emit('playerLeave', { roomId, voidRoom })
-		leaveGame()
-		leaveQueue()
-		leaveHost()
+		leaveGame(gameDispatch)
+		leaveQueue(userDispatch)
+		leaveHost(userDispatch)
 	}
 
 	// chat input update
@@ -423,12 +432,7 @@ const Game = () => {
 			{/* Display modal when opponent disconnected */}
 			<DisconnectModal openDisconnectModal={openDisconnectModal} leaveGameHandler={leaveGameHandler} />
 			{/* Display modal when opponent leaves */}
-			<LeaveModal
-				openLeaveModal={openLeaveModal}
-				leaveGame={leaveGame}
-				leaveQueue={leaveQueue}
-				leaveHost={leaveHost}
-			/>
+			<LeaveModal openLeaveModal={openLeaveModal} />
 		</Grid>
 	)
 }

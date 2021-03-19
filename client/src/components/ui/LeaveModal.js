@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react'
 
 import { useMainStyles, getModalStyle } from './Styles'
+import { useUser, leaveQueue, leaveHost } from '../../context/user/UserContext'
+import { useGame, leaveGame } from '../../context/game/GameContext'
 
 import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, Modal, Fade, Backdrop } from '@material-ui/core'
 
-const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
+const LeaveModal = ({ openLeaveModal }) => {
 	const mainClasses = useMainStyles()
 	const theme = useTheme()
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
+
+	const [ , userDispatch ] = useUser()
+	const [ , gameDispatch ] = useGame()
 
 	const [ timer, setTimer ] = useState(5) // 5 seconds timer
 
@@ -19,9 +24,9 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
 				setTimer(5)
 			} else {
 				if (timer === 0) {
-					leaveGame()
-					leaveQueue()
-					leaveHost()
+					leaveGame(gameDispatch)
+					leaveQueue(userDispatch)
+					leaveHost(userDispatch)
 				} else {
 					id = openLeaveModal && timer > 0 && setTimeout(() => setTimer(timer - 1), 1000)
 				}
@@ -33,7 +38,7 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
 				}
 			}
 		},
-		[ timer, openLeaveModal ]
+		[ timer, openLeaveModal, gameDispatch, userDispatch ]
 	)
 
 	// Modal content
@@ -68,9 +73,9 @@ const LeaveModal = ({ openLeaveModal, leaveGame, leaveQueue, leaveHost }) => {
 							className={mainClasses.modalButton}
 							fullWidth
 							onClick={() => {
-								leaveGame()
-								leaveQueue()
-								leaveHost()
+								leaveGame(gameDispatch)
+								leaveQueue(userDispatch)
+								leaveHost(userDispatch)
 							}}
 						>
 							Return to lobby now

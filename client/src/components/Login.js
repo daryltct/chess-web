@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 
-import { UserContext } from '../context/user/UserContext'
+import { useAlert } from '../context/alert/AlertContext'
+import { useUser, login, loginGuest } from '../context/user/UserContext'
 import { useMainStyles, getModalStyle } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -27,7 +28,8 @@ const Login = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	const { login, userState, loginGuest } = useContext(UserContext)
+	const [ , alertDispatch ] = useAlert()
+	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 
 	const [ open, setOpen ] = useState(false)
@@ -44,7 +46,7 @@ const Login = () => {
 				history.push('/')
 			}
 		},
-		[ isLoggedIn ]
+		[ isLoggedIn, history ]
 	)
 
 	// input fields update
@@ -58,7 +60,7 @@ const Login = () => {
 
 	const handleSubmit = (event) => {
 		event.preventDefault()
-		login(user)
+		login(userDispatch, alertDispatch, user)
 	}
 
 	// display call to action modal to register if user attempts to login as guest
@@ -107,7 +109,7 @@ const Login = () => {
 							variant="contained"
 							color="secondary"
 							className={mainClasses.modalButton}
-							onClick={loginGuest}
+							onClick={() => loginGuest(userDispatch)}
 							fullWidth
 						>
 							I'LL PASS ON THESE PERKS

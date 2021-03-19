@@ -1,11 +1,11 @@
-import React, { Fragment, useEffect, useContext, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import io from 'socket.io-client'
 import Typewriter from 'typewriter-effect'
 import uniqid from 'uniqid'
 
-import { UserContext } from '../context/user/UserContext'
-import { GameContext } from '../context/game/GameContext'
-import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
+import { useUser, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } from '../context/user/UserContext'
+import { useGame, initRoom, reconnectGame } from '../context/game/GameContext'
 import Game from './Game'
 import { useMainStyles } from './ui/Styles'
 
@@ -53,10 +53,9 @@ const Home = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	const { setAlert } = useContext(AlertContext)
-	const { userState, initSocket, joinQueue, leaveQueue, hostGame, leaveHost } = useContext(UserContext)
-	const { gameState, initRoom, reconnectGame } = useContext(GameContext)
-
+	const [ , alertDispatch ] = useAlert()
+	const [ userState, userDispatch ] = useUser()
+	const [ gameState, gameDispatch ] = useGame()
 	const { socket, inQueue, isHost, user } = userState
 
 	const [ roomInput, setRoomInput ] = useState('')
@@ -66,49 +65,54 @@ const Home = () => {
 		() => {
 			if (user) {
 				initSocket(
+					userDispatch,
 					io(PORT, {
 						query: { playerId: user._id, playerName: user.name }
 					})
 				)
 			}
 		},
-		[ user ]
+		[ user, userDispatch ]
 	)
 
 	useEffect(
 		() => {
+			const gameStartHandler = (data) => {
+				initRoom(gameDispatch, data)
+			}
+
 			const reconnectHandler = (data) => {
-				reconnectGame(data)
-				joinQueue()
+				reconnectGame(gameDispatch, data)
+				joinQueue(userDispatch)
 			}
 
 			const errorHandler = (data) => {
-				setAlert(data, 'error')
+				setAlert(alertDispatch, data, 'error')
 			}
 
 			if (socket) {
-				socket.on('gameStart', initRoom)
+				socket.on('gameStart', gameStartHandler)
 				socket.on('reconnect', reconnectHandler)
 				socket.on('error', errorHandler)
 
 				return () => {
-					socket.off('gameStart', initRoom)
+					socket.off('gameStart', gameStartHandler)
 					socket.off('reconnect', reconnectGame)
 					socket.off('error', errorHandler)
 				}
 			}
 		},
-		[ socket ]
+		[ socket, alertDispatch, userDispatch, gameDispatch ]
 	)
 
 	// toggle queue button (join/leave queue)
 	const toggleQueue = () => {
 		if (!inQueue) {
 			socket.emit('findGame', true)
-			joinQueue()
+			joinQueue(userDispatch)
 		} else {
 			socket.emit('findGame', false)
-			leaveQueue()
+			leaveQueue(userDispatch)
 		}
 	}
 
@@ -117,10 +121,10 @@ const Home = () => {
 		if (!isHost) {
 			const roomId = uniqid()
 			socket.emit('hostRoom', { roomId, signal: true })
-			hostGame(roomId)
+			hostGame(userDispatch, roomId)
 		} else {
 			socket.emit('hostRoom', { roomId: isHost, signal: false })
-			leaveHost()
+			leaveHost(userDispatch)
 		}
 	}
 

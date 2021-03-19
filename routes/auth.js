@@ -19,6 +19,7 @@ router.get('/', checkToken, async (req, res) => {
 		console.error(e)
 		res.status(500).json({ msg: 'Server Error' })
 	}
+	console.log(`GET /api/auth`)
 })
 
 // POST api/auth
@@ -76,6 +77,7 @@ router.post(
 			console.error(e)
 			res.status(500).json({ msg: 'Server Error' })
 		}
+		console.log(`POST /api/auth`)
 	}
 )
 

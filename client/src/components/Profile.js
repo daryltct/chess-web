@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
-import { UserContext } from '../context/user/UserContext'
-import { AlertContext } from '../context/alert/AlertContext'
+import { useAlert, setAlert } from '../context/alert/AlertContext'
+import { useUser, loadUser } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
@@ -32,31 +32,34 @@ const Profile = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 
-	const { setAlert } = useContext(AlertContext)
-	const { loadUser, userState } = useContext(UserContext)
+	const [ , alertDispatch ] = useAlert()
+	const [ userState, userDispatch ] = useUser()
 	const { user, isGuest, socket } = userState
 
 	const [ top5, setTop5 ] = useState(null)
 	const [ rank, setRank ] = useState(null)
 
-	useEffect(() => {
-		const getUsers = async () => {
-			try {
-				const res = await axios.get('/api/users')
-				setRank(res.data.rank)
-				setTop5(res.data.users)
-			} catch (err) {
-				setAlert(err.response.data.msg, 'error')
+	useEffect(
+		() => {
+			const getUsers = async () => {
+				try {
+					const res = await axios.get('/api/users')
+					setRank(res.data.rank)
+					setTop5(res.data.users)
+				} catch (err) {
+					setAlert(alertDispatch, err.response.data.msg, 'error')
+				}
 			}
-		}
-		if (socket) {
-			socket.close()
-		}
-		if (!isGuest) {
-			loadUser()
-			getUsers()
-		}
-	}, [])
+			if (socket) {
+				socket.close()
+			}
+			if (!isGuest) {
+				loadUser(userDispatch)
+				getUsers()
+			}
+		},
+		[ isGuest, socket, alertDispatch, userDispatch ]
+	)
 
 	// Leaderboard display
 	const leaderboard = top5 ? (
