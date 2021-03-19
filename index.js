@@ -4,6 +4,7 @@ const httpServer = require('http').createServer(app)
 const io = require('socket.io')(httpServer)
 const EloRank = require('elo-rank')
 const elo = new EloRank(32) // k-factor = 32
+const path = require('path')
 
 const connectDB = require('./db')
 const Room = require('./models/Room')
@@ -24,6 +25,13 @@ connectDB()
 app.use(express.json({ extended: false }))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/auth', require('./routes/auth'))
+
+// serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+	// static folder
+	app.use(express.static('client/build'))
+	app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html')))
+}
 
 // player queue
 const playerQueue = []
@@ -179,6 +187,6 @@ io.on('connection', (socket) => {
 	})
 })
 
-httpServer.listen(5000, () => {
+httpServer.listen(process.env.PORT || 5000, () => {
 	console.log('listening on port 5000')
 })
