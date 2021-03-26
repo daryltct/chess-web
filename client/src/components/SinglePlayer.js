@@ -10,6 +10,10 @@ import { makeStyles } from '@material-ui/styles'
 import { useTheme } from '@material-ui/core/styles'
 import { useMediaQuery, Grid, Typography, Button, LinearProgress } from '@material-ui/core'
 
+const lgScreenSize = 560
+const mdScreenSize = 450
+const xsScreenSize = 320
+
 // INLINE STYLES
 const useStyles = makeStyles((theme) => ({
 	levelButtons: {
@@ -28,6 +32,15 @@ const useStyles = makeStyles((theme) => ({
 	},
 	endGameMsg: {
 		marginTop: '10px'
+	},
+	boardContainer: {
+		height: lgScreenSize + 10,
+		[theme.breakpoints.down('md')]: {
+			height: mdScreenSize + 10
+		},
+		[theme.breakpoints.down('xs')]: {
+			height: xsScreenSize + 10
+		}
 	}
 }))
 
@@ -46,6 +59,7 @@ const SinglePlayer = () => {
 	const mainClasses = useMainStyles()
 	const classes = useStyles()
 	const theme = useTheme()
+	const isMD = useMediaQuery(theme.breakpoints.down('md'))
 	const isXS = useMediaQuery(theme.breakpoints.down('xs'))
 
 	const [ , alertDispatch ] = useAlert()
@@ -152,17 +166,20 @@ const SinglePlayer = () => {
 			<Grid container item direction="column" alignContent="center">
 				{game &&
 					(level ? (
-						<Chessboard
-							position={fen}
-							onDrop={onDrop}
-							draggable={turn === 'white'}
-							width={isXS ? 320 : 560}
-						/>
+						<div className={classes.boardContainer}>
+							<Chessboard
+								position={fen}
+								onDrop={onDrop}
+								draggable={turn === 'white'}
+								width={isXS ? xsScreenSize : isMD ? mdScreenSize : lgScreenSize}
+							/>
+							{/* Display loading bar if computer is processing next move */}
+							{turn === 'black' && <LinearProgress />}
+						</div>
 					) : (
 						levelSelectionDisplay
 					))}
-				{/* Display loading bar if computer is processing next move */}
-				{turn === 'black' && <LinearProgress />}
+
 				{winner && (
 					<Fragment>
 						{/* Wining message display */}
@@ -179,6 +196,17 @@ const SinglePlayer = () => {
 							Rematch
 						</Button>
 					</Fragment>
+				)}
+				{!winner &&
+				level && (
+					<Button
+						className={classes.rematchButton}
+						variant="contained"
+						color="primary"
+						onClick={startRematch}
+					>
+						Leave Game
+					</Button>
 				)}
 			</Grid>
 		</Grid>

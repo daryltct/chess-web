@@ -6,7 +6,8 @@ import { useUser, login, loginGuest } from '../context/user/UserContext'
 import { useMainStyles, getModalStyle } from './ui/Styles'
 
 import { makeStyles } from '@material-ui/styles'
-import { Grid, Typography, Button, TextField, Modal, Fade, Backdrop } from '@material-ui/core'
+import { Grid, Typography, Button, TextField, Modal, Fade, Backdrop, IconButton } from '@material-ui/core'
+import { Visibility, VisibilityOff } from '@material-ui/icons'
 
 // INLINE STYLES
 const useStyles = makeStyles((theme) => ({
@@ -32,6 +33,7 @@ const Login = () => {
 	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 
+	const [ maskPassword, setMaskPassword ] = useState(true)
 	const [ open, setOpen ] = useState(false)
 	const [ user, setUser ] = useState({
 		email: '',
@@ -61,6 +63,10 @@ const Login = () => {
 	const handleSubmit = (event) => {
 		event.preventDefault()
 		login(userDispatch, alertDispatch, user)
+	}
+
+	const toggleMaskPassword = () => {
+		setMaskPassword((prevState) => !prevState)
 	}
 
 	// display call to action modal to register if user attempts to login as guest
@@ -141,11 +147,18 @@ const Login = () => {
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<TextField
 					name="password"
-					type="password"
+					type={maskPassword ? 'password' : 'text'}
 					value={password}
 					label="Password"
 					onChange={handleChange}
 					variant="outlined"
+					InputProps={{
+						endAdornment: (
+							<IconButton aria-label="toggle password visibility" onClick={toggleMaskPassword}>
+								{maskPassword ? <VisibilityOff /> : <Visibility />}
+							</IconButton>
+						)
+					}}
 					fullWidth
 				/>
 			</Grid>

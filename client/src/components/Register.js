@@ -5,7 +5,8 @@ import { useAlert } from '../context/alert/AlertContext'
 import { useUser, register } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
-import { Grid, Typography, Button, TextField } from '@material-ui/core'
+import { Grid, Typography, Button, TextField, IconButton } from '@material-ui/core'
+import { Visibility, VisibilityOff } from '@material-ui/icons'
 
 const Register = () => {
 	let history = useHistory()
@@ -15,6 +16,7 @@ const Register = () => {
 	const [ userState, userDispatch ] = useUser()
 	const { isLoggedIn } = userState
 
+	const [ maskPassword, setMaskPassword ] = useState(true)
 	const [ user, setUser ] = useState({
 		email: '',
 		name: '',
@@ -44,6 +46,10 @@ const Register = () => {
 	const handleSubmit = (event) => {
 		event.preventDefault()
 		register(userDispatch, alertDispatch, user)
+	}
+
+	const toggleMaskPassword = () => {
+		setMaskPassword((prevState) => !prevState)
 	}
 
 	return (
@@ -78,11 +84,18 @@ const Register = () => {
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
 				<TextField
 					name="password"
-					type="password"
+					type={maskPassword ? 'password' : 'text'}
 					value={password}
 					label="Password"
 					onChange={handleChange}
 					variant="outlined"
+					InputProps={{
+						endAdornment: (
+							<IconButton aria-label="toggle password visibility" onClick={toggleMaskPassword}>
+								{maskPassword ? <VisibilityOff /> : <Visibility />}
+							</IconButton>
+						)
+					}}
 					fullWidth
 				/>
 			</Grid>
