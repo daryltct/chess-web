@@ -75,7 +75,7 @@ const Register = () => {
 					name="name"
 					type="text"
 					value={name}
-					label="Name"
+					label="Username"
 					onChange={handleChange}
 					variant="outlined"
 					fullWidth
