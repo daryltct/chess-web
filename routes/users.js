@@ -142,4 +142,28 @@ router.get('/', checkToken, async (req, res) => {
 	console.log(`GET /api/users`)
 })
 
+// GET api/users/availability
+// checks if a name or email already exists
+// public access
+router.get('/availability', async (req, res) => {
+	const { name, email } = req.query
+
+	const availResponse = {}
+	try {
+		let user
+		if (name) {
+			user = await User.findOne({ name })
+			availResponse.name = { query: name, isAvailable: user ? false : true }
+		}
+		if (email) {
+			user = await User.findOne({ email })
+			availResponse.email = { query: email, isAvailable: user ? false : true }
+		}
+		res.json(availResponse)
+	} catch (e) {
+		console.error(e)
+		res.status(500).json({ msg: 'Server Error' })
+	}
+})
+
 module.exports = router
