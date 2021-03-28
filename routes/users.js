@@ -34,6 +34,10 @@ router.post(
 			if (user) {
 				return res.status(400).json({ msg: 'An account with the associated email already exists' })
 			}
+			user = await User.findOne({ name })
+			if (user) {
+				return res.status(400).json({ msg: 'Username is already taken' })
+			}
 
 			// hash password
 			const salt = await bcrypt.genSalt()
@@ -77,14 +81,38 @@ router.post(
 // update user
 // private access
 router.put('/', checkToken, async (req, res) => {
-	const { name, games } = req.body
+	const { name, email, password } = req.body
 
 	const updatedUser = {}
-	if (name) updatedUser.name = name
-	if (games) updatedUser.games = games
 
 	try {
-		const user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
+		let user
+		if (name) {
+			// check if user with provided name already exist
+			user = await User.findOne({ name })
+			if (user) {
+				return res.status(400).json({ msg: 'Username is already taken' })
+			}
+			updatedUser.name = name
+		}
+		if (email) {
+			// check if user with provided email already exist
+			user = await User.findOne({ email })
+			if (user) {
+				return res.status(400).json({ msg: 'An account with the associated email already exists' })
+			}
+			updatedUser.email = email
+		}
+		if (password) {
+			// hash password
+			const salt = await bcrypt.genSalt()
+			hashedPassword = await bcrypt.hash(password, salt)
+
+			updatedUser.password = hashedPassword
+		}
+
+		// update user
+		user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
 		res.json(user)
 	} catch (e) {
 		console.error(e)
