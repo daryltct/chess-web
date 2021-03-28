@@ -246,6 +246,7 @@ const Game = () => {
 		if (move === null) return
 		// else alter game state
 		makeMove(gameDispatch)
+		onMouseOutSquare()
 		// check winning conditions
 		if (game.in_checkmate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'checkmate' })
