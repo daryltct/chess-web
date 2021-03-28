@@ -122,16 +122,18 @@ router.put('/', checkToken, async (req, res) => {
 })
 
 // GET api/users/
-// get user's rank and top 5 users' profile
+// get user's rank and top 5 or more users' profile
 // private access
 router.get('/', checkToken, async (req, res) => {
 	try {
+		let limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 5
+
 		const users = await User.find({}, 'name games').sort({ 'games.elo': -1, 'games.total': -1 })
 		const rank = users.findIndex((obj) => obj.id === req.user.id)
 
 		res.json({
 			rank: rank + 1,
-			users: users.slice(0, 5)
+			users: users.slice(0, limit)
 		})
 	} catch (e) {
 		console.error(e)
