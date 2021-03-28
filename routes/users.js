@@ -80,46 +80,61 @@ router.post(
 // PUT api/users/
 // update user
 // private access
-router.put('/', checkToken, async (req, res) => {
-	const { name, email, password } = req.body
+router.put(
+	'/',
+	[
+		checkToken,
+		check('name', 'Please enter a name').optional().not().isEmpty(),
+		check('name', 'Name can only contain alphabets and numbers').optional().isAlphanumeric(),
+		check('email', 'Please enter a valid email address').optional().isEmail(),
+		check('password', 'Please enter a password').optional().not().isEmpty()
+	],
+	async (req, res) => {
+		const err = validationResult(req)
+		if (!err.isEmpty()) {
+			const errArr = err.array()
+			return res.status(400).json({ msg: errArr[0].msg })
+		}
 
-	const updatedUser = {}
+		const { name, email, password } = req.body
+		const updatedUser = {}
 
-	try {
-		let user
-		if (name) {
-			// check if user with provided name already exist
-			user = await User.findOne({ name })
-			if (user) {
-				return res.status(400).json({ msg: 'Username is already taken' })
+		try {
+			let user
+			if (name) {
+				// check if user with provided name already exist
+				user = await User.findOne({ name })
+				if (user) {
+					return res.status(400).json({ msg: 'Username is already taken' })
+				}
+				updatedUser.name = name
 			}
-			updatedUser.name = name
-		}
-		if (email) {
-			// check if user with provided email already exist
-			user = await User.findOne({ email })
-			if (user) {
-				return res.status(400).json({ msg: 'An account with the associated email already exists' })
+			if (email) {
+				// check if user with provided email already exist
+				user = await User.findOne({ email })
+				if (user) {
+					return res.status(400).json({ msg: 'An account with the associated email already exists' })
+				}
+				updatedUser.email = email
 			}
-			updatedUser.email = email
-		}
-		if (password) {
-			// hash password
-			const salt = await bcrypt.genSalt()
-			hashedPassword = await bcrypt.hash(password, salt)
+			if (password) {
+				// hash password
+				const salt = await bcrypt.genSalt()
+				hashedPassword = await bcrypt.hash(password, salt)
 
-			updatedUser.password = hashedPassword
-		}
+				updatedUser.password = hashedPassword
+			}
 
-		// update user
-		user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
-		res.json(user)
-	} catch (e) {
-		console.error(e)
-		res.status(500).json({ msg: 'Server Error' })
+			// update user
+			user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
+			res.json(user)
+		} catch (e) {
+			console.error(e)
+			res.status(500).json({ msg: 'Server Error' })
+		}
+		console.log(`PUT /api/users`)
 	}
-	console.log(`PUT /api/users`)
-})
+)
 
 // GET api/users/
 // get user's rank and top 5 or more users' profile
