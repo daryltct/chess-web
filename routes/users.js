@@ -104,7 +104,7 @@ router.put(
 			if (name) {
 				// check if user with provided name already exist
 				user = await User.findOne({ name })
-				if (user) {
+				if (user && user.id !== req.user.id) {
 					return res.status(400).json({ msg: 'Username is already taken' })
 				}
 				updatedUser.name = name
@@ -112,7 +112,7 @@ router.put(
 			if (email) {
 				// check if user with provided email already exist
 				user = await User.findOne({ email })
-				if (user) {
+				if (user && user.id !== req.user.id) {
 					return res.status(400).json({ msg: 'An account with the associated email already exists' })
 				}
 				updatedUser.email = email
