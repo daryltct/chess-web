@@ -183,6 +183,10 @@ io.on('connection', (socket) => {
 		const playerIndex = playerQueue.findIndex((s) => s.id === socket.id)
 		if (playerIndex !== -1) playerQueue.splice(playerIndex, 1)
 
+		// remove room from hosted rooms
+		const roomIndex = hostedRooms.findIndex((room) => room.player.id === socket.id)
+		if (roomIndex !== -1) hostedRooms.splice(roomIndex, 1)
+
 		console.log(`Socket ${socket.id} has disconnected`)
 	})
 })
