@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
 			// update room in database with new game state
 			await Room.findByIdAndUpdate(data.roomId, { $set: { pgn: data.pgn, inProgress: true } })
 
-			socket.to(data.roomId).emit('move', { from: data.move.from, to: data.move.to, promotion: 'q' })
+			socket.to(data.roomId).emit('move', data.move)
 		} catch (e) {
 			console.error(e)
 		}
@@ -84,9 +84,8 @@ io.on('connection', (socket) => {
 		updateStatsOnGameEnd(data)
 		swapColor(data.roomId)
 
-		socket
-			.to(data.roomId)
-			.emit('gameEnd', { ...data, move: { from: data.move.from, to: data.move.to, promotion: 'q' } })
+		const { roomId, ...payload } = data // create payload from data but exclude roomId
+		socket.to(data.roomId).emit('gameEnd', payload)
 	})
 
 	// user initiating/accepting/declining a rematch request
@@ -94,7 +93,8 @@ io.on('connection', (socket) => {
 		// update color on socket object
 		socket.color = socket.color === 'white' ? 'black' : 'white'
 
-		socket.to(data.roomId).emit('rematch', { ...data.opponent })
+		const { roomId, ...payload } = data // create payload from data but exclude roomId
+		socket.to(data.roomId).emit('rematch', payload)
 	})
 
 	// user has left game/room

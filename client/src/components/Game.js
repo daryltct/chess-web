@@ -305,10 +305,7 @@ const Game = () => {
 		acceptRematch(gameDispatch)
 		socket.emit('rematch', {
 			roomId,
-			opponent: {
-				id: socket.id,
-				rematch: true
-			}
+			rematch: true
 		})
 	}
 
@@ -317,11 +314,7 @@ const Game = () => {
 		declineRematch(gameDispatch)
 		socket.emit('rematch', {
 			roomId,
-			opponent: {
-				id: socket.id,
-				rematch: false,
-				decline: true
-			}
+			decline: true
 		})
 	}
 
