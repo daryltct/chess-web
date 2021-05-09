@@ -246,6 +246,7 @@ const Game = () => {
 		if (move === null) return
 		// else alter game state
 		makeMove(gameDispatch)
+		onMouseOutSquare()
 		// check winning conditions
 		if (game.in_checkmate()) {
 			socket.emit('gameEnd', { roomId, move, winner: color, reason: 'checkmate' })
@@ -304,10 +305,7 @@ const Game = () => {
 		acceptRematch(gameDispatch)
 		socket.emit('rematch', {
 			roomId,
-			opponent: {
-				id: socket.id,
-				rematch: true
-			}
+			rematch: true
 		})
 	}
 
@@ -316,11 +314,7 @@ const Game = () => {
 		declineRematch(gameDispatch)
 		socket.emit('rematch', {
 			roomId,
-			opponent: {
-				id: socket.id,
-				rematch: false,
-				decline: true
-			}
+			decline: true
 		})
 	}
 

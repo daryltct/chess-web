@@ -34,6 +34,10 @@ router.post(
 			if (user) {
 				return res.status(400).json({ msg: 'An account with the associated email already exists' })
 			}
+			user = await User.findOne({ name })
+			if (user) {
+				return res.status(400).json({ msg: 'Username is already taken' })
+			}
 
 			// hash password
 			const salt = await bcrypt.genSalt()
@@ -76,40 +80,105 @@ router.post(
 // PUT api/users/
 // update user
 // private access
-router.put('/', checkToken, async (req, res) => {
-	const { name, games } = req.body
+router.put(
+	'/',
+	[
+		checkToken,
+		check('name', 'Please enter a name').optional().not().isEmpty(),
+		check('name', 'Name can only contain alphabets and numbers').optional().isAlphanumeric(),
+		check('email', 'Please enter a valid email address').optional().isEmail(),
+		check('password', 'Please enter a password').optional().not().isEmpty()
+	],
+	async (req, res) => {
+		const err = validationResult(req)
+		if (!err.isEmpty()) {
+			const errArr = err.array()
+			return res.status(400).json({ msg: errArr[0].msg })
+		}
 
-	const updatedUser = {}
-	if (name) updatedUser.name = name
-	if (games) updatedUser.games = games
+		const { name, email, password } = req.body
+		const updatedUser = {}
 
-	try {
-		const user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
-		res.json(user)
-	} catch (e) {
-		console.error(e)
-		res.status(500).json({ msg: 'Server Error' })
+		try {
+			let user
+			if (name) {
+				// check if user with provided name already exist
+				user = await User.findOne({ name })
+				if (user && user.id !== req.user.id) {
+					return res.status(400).json({ msg: 'Username is already taken' })
+				}
+				updatedUser.name = name
+			}
+			if (email) {
+				// check if user with provided email already exist
+				user = await User.findOne({ email })
+				if (user && user.id !== req.user.id) {
+					return res.status(400).json({ msg: 'An account with the associated email already exists' })
+				}
+				updatedUser.email = email
+			}
+			if (password) {
+				// hash password
+				const salt = await bcrypt.genSalt()
+				hashedPassword = await bcrypt.hash(password, salt)
+
+				updatedUser.password = hashedPassword
+			}
+
+			// update user
+			user = await User.findByIdAndUpdate(req.user.id, { $set: updatedUser }, { new: true }).select('-password')
+			res.json(user)
+		} catch (e) {
+			console.error(e)
+			res.status(500).json({ msg: 'Server Error' })
+		}
+		console.log(`PUT /api/users`)
 	}
-	console.log(`PUT /api/users`)
-})
+)
 
 // GET api/users/
-// get user's rank and top 5 users' profile
+// get user's rank and top 5 or more users' profile
 // private access
 router.get('/', checkToken, async (req, res) => {
 	try {
+		let limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 5
+
 		const users = await User.find({}, 'name games').sort({ 'games.elo': -1, 'games.total': -1 })
 		const rank = users.findIndex((obj) => obj.id === req.user.id)
 
 		res.json({
 			rank: rank + 1,
-			users: users.slice(0, 5)
+			users: users.slice(0, limit)
 		})
 	} catch (e) {
 		console.error(e)
 		res.status(500).json({ msg: 'Server Error' })
 	}
 	console.log(`GET /api/users`)
+})
+
+// GET api/users/availability
+// checks if a name or email already exists
+// public access
+router.get('/availability', async (req, res) => {
+	const { name, email } = req.query
+
+	const availResponse = {}
+	try {
+		let user
+		if (name) {
+			user = await User.findOne({ name })
+			availResponse.name = { query: name, isAvailable: user ? false : true }
+		}
+		if (email) {
+			user = await User.findOne({ email })
+			availResponse.email = { query: email, isAvailable: user ? false : true }
+		}
+		res.json(availResponse)
+	} catch (e) {
+		console.error(e)
+		res.status(500).json({ msg: 'Server Error' })
+	}
 })
 
 module.exports = router

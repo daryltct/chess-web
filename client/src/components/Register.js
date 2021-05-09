@@ -5,11 +5,20 @@ import { useAlert } from '../context/alert/AlertContext'
 import { useUser, register } from '../context/user/UserContext'
 import { useMainStyles } from './ui/Styles'
 
+import { makeStyles } from '@material-ui/styles'
 import { Grid, Typography, Button, TextField, IconButton } from '@material-ui/core'
 import { Visibility, VisibilityOff } from '@material-ui/icons'
 
+const useStyles = makeStyles((theme) => ({
+	disclaimerText: {
+		fontSize: '0.8rem',
+		color: 'gray'
+	}
+}))
+
 const Register = () => {
 	let history = useHistory()
+	const classes = useStyles()
 	const mainClasses = useMainStyles()
 
 	const [ , alertDispatch ] = useAlert()
@@ -75,7 +84,7 @@ const Register = () => {
 					name="name"
 					type="text"
 					value={name}
-					label="Name"
+					label="Username"
 					onChange={handleChange}
 					variant="outlined"
 					fullWidth
@@ -109,6 +118,13 @@ const Register = () => {
 				>
 					Register
 				</Button>
+			</Grid>
+			{/* Disclaimer text */}
+			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
+				<Typography align="center" className={classes.disclaimerText}>
+					By registering, you are providing consent for the application to store your email address with the
+					sole purpose of account authentication and nothing more.
+				</Typography>
 			</Grid>
 			{/* Footer - link to login page */}
 			<Grid item className={mainClasses.loginAndRegisterSubContainer}>
